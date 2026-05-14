@@ -1,717 +1,935 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="lo">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pre-Post Test for CSS Nutrition</title>
-    
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
-    <!-- Tailwind CSS -->
+    <title>FGD Prompt Generator</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- SheetJS for Excel/CSV parsing -->
-    <script src="https://cdn.jsdelivr.net/npm/xlsx/dist/xlsx.full.min.js"></script>
-    
-    <!-- Chart.js for Data Visualization -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-
-    <!-- Lucide Icons -->
-    <script src="https://unpkg.com/lucide@latest"></script>
-
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Sans+Lao:wght@300;400;500;600;700&display=swap');
         body {
-            font-family: 'Inter', 'Noto Sans Lao', sans-serif;
-            background-color: #f8fafc;
+            font-family: 'Noto Sans Lao', sans-serif;
+            background-color: #f3f4f6;
         }
-        
-        .drag-over {
-            border-color: #3b82f6 !important;
-            background-color: #eff6ff !important;
-        }
-
-        /* Print Styles */
-        @media print {
-            body {
-                background-color: white;
-            }
-            .no-print {
-                display: none !important;
-            }
-            .print-full-width {
-                width: 100% !important;
-                max-width: none !important;
-                box-shadow: none !important;
-                border: none !important;
-            }
-            .chart-container {
-                page-break-inside: avoid;
-                margin-bottom: 2rem;
-            }
-            /* Force background colors to print */
-            * {
-                -webkit-print-color-adjust: exact !important;
-                print-color-adjust: exact !important;
-            }
-        }
+        textarea::-webkit-scrollbar { width: 8px; }
+        textarea::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 4px; }
+        textarea::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+        textarea::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
     </style>
 </head>
-<body class="text-slate-800">
+<body class="min-h-screen p-4 md:p-8 flex flex-col items-center gap-8">
 
-    <!-- Navbar -->
-    <nav class="bg-white shadow-sm border-b border-slate-200 sticky top-0 z-10 no-print">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <div class="flex items-center gap-2">
-                    <i data-lucide="bar-chart-2" class="text-blue-600 h-6 w-6"></i>
-                    <h1 class="font-bold text-xl text-slate-800" data-i18n="title">Training Evaluation Dashboard</h1>
+    <div class="max-w-3xl w-full bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col">
+        <!-- ພາກສ່ວນຟອມປ້ອນຂໍ້ມູນ -->
+        <div class="w-full p-6 md:p-8 bg-slate-50">
+            <div class="mb-6">
+                <div class="flex justify-between items-start">
+                    <h1 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                        <i class="ph-fill ph-users-three text-blue-600"></i>
+                        ສ້າງ Prompt ແກະສຽງ FGD
+                    </h1>
+                    <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full border border-blue-200 shadow-sm flex items-center gap-1">
+                        <i class="ph-fill ph-user-circle text-sm"></i> ຜູ້ສ້າງ: Sengdeuan
+                    </span>
                 </div>
-                <div class="flex items-center space-x-4">
-                    <!-- Language Toggle -->
-                    <div class="bg-slate-100 p-1 rounded-lg flex items-center">
-                        <button onclick="setLanguage('en')" id="lang-en" class="px-3 py-1 rounded-md text-sm font-medium bg-white shadow-sm text-slate-800 transition-colors">EN</button>
-                        <button onclick="setLanguage('lo')" id="lang-lo" class="px-3 py-1 rounded-md text-sm font-medium text-slate-500 hover:text-slate-800 transition-colors">ລາວ</button>
+                <p class="text-slate-500 text-sm mt-2">ປ້ອນຂໍ້ມູນກ່ຽວກັບການສົນທະນາຂອງທ່ານ ເພື່ອໃຫ້ AI ເຂົ້າໃຈບໍລິບົດ ແລະ ແກະສຽງໄດ້ຖືກຕ້ອງທີ່ສຸດ.</p>
+            </div>
+
+            <form id="promptForm" class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">ຫົວຂໍ້ການສົນທະນາ (Topic)</label>
+                    <input type="text" id="topic" placeholder="ຕົວຢ່າງ: ຄວາມຄິດເຫັນຕໍ່ສິນຄ້າໃໝ່, ບັນຫາການຮຽນອອນລາຍ..." 
+                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">ຈຳນວນຜູ້ເວົ້າ</label>
+                        <input type="number" id="speakers" placeholder="ເຊັ່ນ: 5" min="1" 
+                            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                     </div>
-                    <!-- Clear Data Button (Hidden initially) -->
-                    <button id="clear-btn" onclick="clearData()" class="hidden items-center gap-2 bg-rose-50 hover:bg-rose-100 text-rose-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors no-print">
-                        <i data-lucide="trash-2" class="h-4 w-4"></i>
-                        <span data-i18n="clearData">Clear Data</span>
-                    </button>
-                    <!-- Print Button -->
-                    <button onclick="window.print()" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors">
-                        <i data-lucide="printer" class="h-4 w-4"></i>
-                        <span data-i18n="printBtn">Print Report</span>
-                    </button>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">ພາສາຂອງ Prompt</label>
+                        <select id="promptLang" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="en">ພາສາອັງກິດ (ແນະນຳສຳລັບ AI)</option>
+                            <option value="lo">ພາສາລາວ</option>
+                        </select>
+                    </div>
                 </div>
-            </div>
-        </div>
-    </nav>
 
-    <!-- Main Content -->
-    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 print-full-width">
-        
-        <!-- Upload Section (Hidden after upload) -->
-        <div id="upload-section" class="mb-8 no-print">
-            <div class="bg-white p-8 rounded-xl border-2 border-dashed border-slate-300 text-center transition-colors hover:border-blue-400" id="drop-zone">
-                <i data-lucide="upload-cloud" class="h-12 w-12 mx-auto text-slate-400 mb-4"></i>
-                <h3 class="text-lg font-medium text-slate-900 mb-1" data-i18n="uploadLabel">Upload Excel/CSV Data</h3>
-                <p class="text-sm text-slate-500 mb-4" data-i18n="uploadPrompt">Drag and drop your file here, or click to browse</p>
-                <input type="file" id="file-upload" class="hidden" accept=".csv, application/vnd.openxmlformats-officedocument.spreadsheetml.sheet, application/vnd.ms-excel">
-                <button onclick="document.getElementById('file-upload').click()" class="bg-slate-100 hover:bg-slate-200 text-slate-700 font-medium py-2 px-6 rounded-lg transition-colors border border-slate-300">
-                    <span data-i18n="browseFiles">Browse Files</span>
-                </button>
-            </div>
-            <!-- Error message container -->
-            <div id="error-message" class="hidden mt-4 p-4 bg-red-50 text-red-600 rounded-lg text-sm border border-red-200 flex items-center gap-2">
-                <i data-lucide="alert-circle" class="h-4 w-4"></i>
-                <span id="error-text"></span>
-            </div>
-        </div>
-
-        <!-- Dashboard Section (Hidden initially) -->
-        <div id="dashboard-section" class="hidden flex-col gap-6">
-            
-            <!-- Header for Print -->
-            <div class="hidden print:block mb-6 border-b pb-4">
-                <h1 class="text-2xl font-bold" data-i18n="title">Training Evaluation Dashboard</h1>
-                <p class="text-slate-500 mt-1" id="print-date"></p>
-            </div>
-
-            <!-- Filter Section -->
-            <div id="filter-section" class="hidden flex justify-end items-center no-print bg-white p-4 rounded-xl shadow-sm border border-slate-100">
-                <div class="flex items-center gap-3">
-                    <i data-lucide="filter" class="h-4 w-4 text-slate-500"></i>
-                    <label for="province-filter" class="text-sm font-semibold text-slate-700" data-i18n="filterProvince">Filter by Province:</label>
-                    <select id="province-filter" onchange="applyFiltersAndRender()" class="bg-slate-50 border border-slate-200 text-slate-800 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block p-2 min-w-[200px] outline-none transition-colors cursor-pointer">
-                        <option value="all" data-i18n="allProvinces">All Provinces</option>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">ຮູບແບບການແກະສຽງ (Style)</label>
+                    <select id="format" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                        <option value="clean">Clean Read (ຕັດຄຳຟຸມເຟືອຍ ເຊັ່ນ: ອືມ, ອ່າ ອອກ)</option>
+                        <option value="verbatim">Strict Verbatim (ເອົາທຸກຄຳເວົ້າ, ທຸກສຽງສະດຸດ)</option>
+                        <option value="summary">Summary (ສະຫຼຸບໃຈຄວາມສຳຄັນແຕ່ລະປະເດັນ)</option>
                     </select>
                 </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">ການລະບຸຕົວຜູ້ເວົ້າ (Speaker ID)</label>
+                    <select id="speakerId" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" onchange="generatePrompt()">
+                        <option value="numbered">ໃຊ້ Speaker 1, Speaker 2, ຜູ້ປະສານງານ (Moderator)</option>
+                        <option value="names">ພະຍາຍາມລະບຸຊື່ຕາມທີ່ໄດ້ຍິນໃນສຽງ</option>
+                        <option value="none">ບໍ່ຈຳເປັນຕ້ອງແຍກຜູ້ເວົ້າ (ລວມກັນເລີຍ)</option>
+                    </select>
+                </div>
+
+                <!-- ລາຍລະອຽດຜູ້ເວົ້າ & ຕົວຢ່າງສຽງ -->
+                <div class="border border-slate-200 rounded-lg p-4 bg-slate-100">
+                    <div class="flex justify-between items-center mb-2">
+                        <label class="block text-sm font-semibold text-slate-800">ລາຍລະອຽດຜູ້ເວົ້າ & ຕົວຢ່າງສຽງ <span class="text-xs text-slate-500 font-normal">(ທາງເລືອກ)</span></label>
+                        <button type="button" onclick="addSpeaker()" class="text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded hover:bg-blue-300 transition-colors flex items-center gap-1 font-semibold">
+                            <i class="ph ph-plus"></i> ເພີ່ມຜູ້ເວົ້າ
+                        </button>
+                    </div>
+                    <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+                        ລະບຸບົດບາດ, ຊື່, ID ຫຼື ອ້າງອີງເຖິງ <strong>ໄຟລ໌ສຽງຕົວຢ່າງ (Voice Sample)</strong> ເພື່ອໃຫ້ AI ແຍກສຽງໄດ້ຊັດເຈນທີ່ສຸດ.
+                    </p>
+                    <div id="speakersContainer" class="space-y-2"></div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">ຄຳສັ່ງເພີ່ມເຕີມ / ຄຳສັບສະເພາະ</label>
+                    <textarea id="extra" rows="3" placeholder="ຕົວຢ່າງ: ຄຳສັບສະເພາະທີ່ອາດໄດ້ຍິນ: CRM, Marketing, B2B..." 
+                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"></textarea>
+                </div>
+
+                <button type="button" onclick="copyToClipboard()" id="copyBtn"
+                    class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-4 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 mt-4 shadow-lg text-lg">
+                    <i class="ph ph-copy"></i> ກັອບປີ້ Prompt (Copy Prompt)
+                </button>
+            </form>
+            <textarea id="output" class="hidden"></textarea>
+            <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-full text-sm font-bold shadow-xl opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center gap-2">
+                <i class="ph-fill ph-check-circle text-lg"></i> ຄັດລອກ Prompt ສຳເລັດແລ້ວ!
             </div>
-
-            <!-- KPI Cards -->
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <!-- Total Participants -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
-                    <div class="bg-blue-100 p-3 rounded-lg text-blue-600">
-                        <i data-lucide="users" class="h-6 w-6"></i>
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-slate-500" data-i18n="totalParticipants">Total Participants</p>
-                        <p class="text-2xl font-bold text-slate-800" id="kpi-participants">0</p>
-                        <div class="mt-1 flex flex-col gap-0.5">
-                            <p class="text-[11px] text-slate-500 font-medium" id="kpi-breakdown-prepost"></p>
-                            <p class="text-[11px] text-slate-500 font-medium" id="kpi-breakdown-gender"></p>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Avg Pre-test -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
-                    <div class="bg-orange-100 p-3 rounded-lg text-orange-600">
-                        <i data-lucide="clipboard-list" class="h-6 w-6"></i>
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-slate-500" data-i18n="avgPreTest">Avg Pre-test Score</p>
-                        <p class="text-2xl font-bold text-slate-800" id="kpi-pre">0.0</p>
-                    </div>
-                </div>
-
-                <!-- Avg Post-test -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
-                    <div class="bg-green-100 p-3 rounded-lg text-green-600">
-                        <i data-lucide="clipboard-check" class="h-6 w-6"></i>
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-slate-500" data-i18n="avgPostTest">Avg Post-test Score</p>
-                        <p class="text-2xl font-bold text-slate-800" id="kpi-post">0.0</p>
-                    </div>
-                </div>
-
-                <!-- Improvement -->
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100 flex items-center gap-4">
-                    <div class="bg-purple-100 p-3 rounded-lg text-purple-600">
-                        <i data-lucide="trending-up" class="h-6 w-6"></i>
-                    </div>
-                    <div>
-                        <p class="text-sm font-medium text-slate-500" data-i18n="improvement">Score Improvement</p>
-                        <p class="text-2xl font-bold text-slate-800" id="kpi-improvement">+0.0%</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Charts Row 1 -->
-            <div class="chart-container">
-                <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-                    <h3 class="text-base font-semibold text-slate-800 mb-4" data-i18n="preVsPostChart">Pre vs Post Test Scores</h3>
-                    <div class="relative h-64">
-                        <canvas id="overallChart"></canvas>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Question Breakdown Table -->
-            <div class="bg-white rounded-xl shadow-sm border border-slate-100 overflow-hidden chart-container">
-                <div class="p-6 border-b border-slate-100">
-                    <h3 class="text-base font-semibold text-slate-800" data-i18n="questionBreakdown">Average Correct Rate by Question</h3>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="min-w-full divide-y divide-slate-200">
-                        <thead class="bg-slate-50">
-                            <tr>
-                                <th scope="col" class="px-6 py-4 text-left text-xs font-semibold text-slate-500 uppercase tracking-wider" data-i18n="thQuestion">Full Question</th>
-                                <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider w-32" data-i18n="thPre">Pre-Test</th>
-                                <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider w-32" data-i18n="thPost">Post-Test</th>
-                                <th scope="col" class="px-6 py-4 text-center text-xs font-semibold text-slate-500 uppercase tracking-wider w-32" data-i18n="thDiff">Improvement</th>
-                            </tr>
-                        </thead>
-                        <tbody id="questionTableBody" class="bg-white divide-y divide-slate-200">
-                            <!-- Rows injected by JS -->
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-
-            <!-- Recommendations Section -->
-            <div class="bg-orange-50 rounded-xl shadow-sm border border-orange-200 overflow-hidden chart-container mt-2">
-                <div class="p-6 border-b border-orange-200 bg-orange-100 flex items-center gap-3">
-                    <i data-lucide="lightbulb" class="h-6 w-6 text-orange-600"></i>
-                    <div>
-                        <h3 class="text-base font-semibold text-orange-900" data-i18n="recommendationTitle">Supportive Supervision Recommendations</h3>
-                        <p class="text-sm text-orange-700 mt-1" data-i18n="recommendationDesc">Topics scoring below 75% on the post-test. Prioritize these during health center visits.</p>
-                    </div>
-                </div>
-                <div class="p-6">
-                    <div id="recommendationEmpty" class="hidden text-green-700 font-medium flex items-center gap-2">
-                        <i data-lucide="check-circle" class="h-5 w-5"></i>
-                        <span data-i18n="noLowScores">Excellent! All topics achieved a post-test average above 75%.</span>
-                    </div>
-                    <div id="recommendationList" class="flex flex-col gap-4">
-                        <!-- Injected by JS -->
-                    </div>
-                </div>
-            </div>
-
         </div>
-    </main>
+    </div>
 
-    <script>
-        // Initialize Lucide Icons
-        lucide.createIcons();
+    <!-- ເຄື່ອງມືແບ່ງໄຟລ໌ສຽງ (Audio File Splitter) ສົມບູນແບບໃໝ່ -->
+    <div class="max-w-5xl w-full bg-white rounded-2xl shadow-xl overflow-hidden p-6 md:p-8">
+        <div class="mb-6 border-b border-slate-200 pb-4">
+            <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                <i class="ph-fill ph-scissors text-orange-500"></i>
+                ເຄື່ອງມືແບ່ງໄຟລ໌ສຽງຫຼັກ (Advanced Audio Splitter)
+            </h2>
+            <p class="text-slate-500 text-sm mt-2">ແບ່ງໄຟລ໌ສຽງໃຫ້ມີຂະໜາດພໍດີກັບການອ່ານຂອງ AI. ລະບົບໃໝ່ຮອງຮັບການແບ່ງຕາມເວລາ ເຊິ່ງເຮັດໃຫ້ໄຟລ໌ສົມບູນ 100%.</p>
+        </div>
 
-        // -------------------------
-        // 1. Translations (i18n)
-        // -------------------------
-        const translations = {
-            en: {
-                title: "Pre-Post Test for CSS Nutrition",
-                uploadLabel: "Upload Pre/Post Test Data",
-                uploadPrompt: "Drag and drop your Excel/CSV file here, or click to browse",
-                browseFiles: "Browse Files",
-                printBtn: "Print Report",
-                totalParticipants: "Total Exams Logged",
-                avgPreTest: "Avg Pre-test Score",
-                avgPostTest: "Avg Post-test Score",
-                improvement: "Score Improvement",
-                preVsPostChart: "Pre vs Post Test Overall Average",
-                questionBreakdown: "Average Correct Rate by Question",
-                errorMissingCols: "Error: Missing required columns (Needs 'Is this pre or post test?' and 'totalscore').",
-                errorFileRead: "Error reading file. Please try again.",
-                preTestLabel: "Pre-Test",
-                postTestLabel: "Post-Test",
-                male: "Male",
-                female: "Female",
-                unknown: "Not Specified",
-                thQuestion: "Full Question",
-                thPre: "Pre-Test Avg",
-                thPost: "Post-Test Avg",
-                thDiff: "Improvement",
-                recommendationTitle: "Supportive Supervision Recommendations",
-                recommendationDesc: "Topics scoring below 75% on the post-test. Prioritize these during health center visits.",
-                recAction: "Recommended Action",
-                genericAction: "Review this topic during the next health center visit. Use relevant Clinical Vignettes to assess understanding and provide on-the-job coaching. Add to the facility's SMART action plan.",
-                noLowScores: "Excellent! All topics achieved a post-test average above 75%.",
-                filterProvince: "Filter by Province:",
-                allProvinces: "All Provinces",
-                clearData: "Clear Data"
-            },
-            lo: {
-                title: "ປະເມີນຜົນກ່ອນ-ຫຼັງການຝຶກອົບຮົມ ວຽກງານໂພຊະນາການ (CSS)",
-                uploadLabel: "ອັບໂຫຼດຂໍ້ມູນ Pre/Post Test",
-                uploadPrompt: "ລາກ ແລະ ວາງໄຟລ໌ Excel/CSV ຂອງທ່ານລົງບ່ອນນີ້ ຫຼື ຄລິກເພື່ອເລືອກໄຟລ໌",
-                browseFiles: "ເລືອກໄຟລ໌",
-                printBtn: "ພິມລາຍງານ",
-                totalParticipants: "ຈຳນວນແບບທົດສອບທັງໝົດ",
-                avgPreTest: "ຄະແນນສະເລ່ຍກ່ອນການທົດສອບ",
-                avgPostTest: "ຄະແນນສະເລ່ຍຫຼັງການທົດສອບ",
-                improvement: "ຄະແນນທີ່ເພີ່ມຂຶ້ນ (%)",
-                preVsPostChart: "ປຽບທຽບຄະແນນສະເລ່ຍລວມ ກ່ອນ ແລະ ຫຼັງການທົດສອບ",
-                questionBreakdown: "ອັດຕາຄຳຕອບທີ່ຖືກຕ້ອງແຍກຕາມຄຳຖາມ",
-                errorMissingCols: "ຜິດພາດ: ບໍ່ພົບຖັນທີ່ຕ້ອງການ (ຕ້ອງການ 'Is this pre or post test?' ແລະ 'totalscore').",
-                errorFileRead: "ເກີດຂໍ້ຜິດພາດໃນການອ່ານໄຟລ໌. ກະລຸນາລອງໃໝ່.",
-                preTestLabel: "ກ່ອນການທົດສອບ (Pre-Test)",
-                postTestLabel: "ຫຼັງການທົດສອບ (Post-Test)",
-                male: "ຊາຍ",
-                female: "ຍິງ",
-                unknown: "ບໍ່ລະບຸ",
-                thQuestion: "ຄຳຖາມເຕັມ",
-                thPre: "ສະເລ່ຍກ່ອນ",
-                thPost: "ສະເລ່ຍຫຼັງ",
-                thDiff: "ຄວາມແຕກຕ່າງ",
-                recommendationTitle: "ຂໍ້ແນະນຳສຳລັບການລົງຕິດຕາມຊຸກຍູ້",
-                recommendationDesc: "ຫົວຂໍ້ທີ່ໄດ້ຄະແນນຫຼັງທົດສອບຕໍ່າກວ່າ 75%. ຄວນສຸມໃສ່ຫົວຂໍ້ເຫຼົ່ານີ້ໃນເວລາລົງຊຸກຍູ້ຢູ່ສຸກສາລາ.",
-                recAction: "ກິດຈະກຳແນະນຳ",
-                genericAction: "ທົບທວນຫົວຂໍ້ນີ້ໃນການລົງຊຸກຍູ້ຄັ້ງຕໍ່ໄປ. ນຳໃຊ້ແບບທົດສອບສະຖານະການ (Clinical Vignettes) ເພື່ອປະເມີນຄວາມເຂົ້າໃຈ ແລະ ໃຫ້ການຝຶກສອນກັບທີ່. ເພີ່ມເຂົ້າໃນແຜນປະຕິບັດງານ (SMART action plan).",
-                noLowScores: "ດີຫຼາຍ! ທຸກຫົວຂໍ້ໄດ້ຄະແນນສະເລ່ຍຫຼັງການທົດສອບສູງກວ່າ 75%.",
-                filterProvince: "ກັ່ນຕອງຕາມແຂວງ:",
-                allProvinces: "ທຸກແຂວງ",
-                clearData: "ລ້າງຂໍ້ມູນ"
-            }
-        };
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="col-span-1 md:col-span-2 space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">1. ເລືອກໄຟລ໌ສຽງຂອງທ່ານ</label>
+                    <input type="file" id="audioFile" accept="audio/*,video/*" 
+                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">2. ວິທີການແບ່ງ (Split Method)</label>
+                    <select id="splitMethod" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none">
+                        <option value="smart">ແບ່ງແບບສົມບູນ - ແບ່ງຕາມເວລາທຸກໆ 10 ນາທີ (Smart Split - ແນະນຳທີ່ສຸດ!)</option>
+                        <option value="binary" selected>ແບ່ງແບບໄວ - ແບ່ງຕາມຂະໜາດທຸກໆ 15MB (Binary Split - ໃຊ້ສະເພາະໄຟລ໌ໃຫຍ່ຫຼາຍ)</option>
+                    </select>
+                </div>
 
-        // Lao translations for the specific 15 questions in the dataset
-        const questionTranslations = {
-            "1": "1. ການລົງຊຸກຍູ້ຕິດຕາມທາງດ້ານຄລີນິກ (CSS) ຈະຈັດຂຶ້ນເມື່ອໃດ?",
-            "2": "2. ຫົວຂໍ້ໃດແດ່ທີ່ໄດ້ຈັດຕັ້ງປະຕິບັດສຳເລັດໃນກິດຈະກຳການລົງຊຸກຍູ້ຕິດຕາມ?",
-            "3": "3. ການລົງຊຸກຍູ້ຕິດຕາມປະຈຳໄຕມາດ 2/2026 ຈະເນັ້ນໃສ່ຫົວຂໍ້ໃດ?",
-            "4": "4. ຄວນນຳໃຊ້ແບບຟອມທົດສອບສະຖານະການ (Clinical Vignette) ເວລາໃດ?",
-            "5": "5. ເປັນຫຍັງຈຶ່ງນຳໃຊ້ສະເພາະແບບຟອມທົດສອບສະຖານະການ (CV) ໂດຍບໍ່ໃຊ້ເຄື່ອງມືສັງເກດໂດຍກົງ (DOC) ສຳລັບວຽກໂພຊະນາການ?",
-            "6": "6. ຂໍ້ໃດລຸ່ມນີ້ ບໍ່ແມ່ນ ໜຶ່ງໃນສາມເຄື່ອງມື CV ດ້ານໂພຊະນາການທີ່ຖືກສ້າງຂຶ້ນ?",
-            "7": "7. ໃນການປະຕິບັດ Clinical Vignette, ຜູ້ຊີ້້ນຳຂັ້ນເມືອງໄດ້ມອບອັນໃດໃຫ້ພະນັກງານແພດເພື່ອຊ່ວຍໃນສະຖານະການ?",
-            "8": "8. ການສົບຕາ (Eye contact) ເປັນຕົວຢ່າງຂອງພາສາກາຍໃນທາງບວກບໍ່?",
-            "9": "9. ແຜນປະຕິບັດງານແບບ SMART ແມ່ນຫຍັງ?",
-            "10": "10. ໃນການສ້າງແຜນປະຕິບັດງານ, ຂັ້ນຕອນໃດຄວນເຮັດກ່ອນ?",
-            "11": "11. ຄວນນຳໃຊ້ແບບຟອມການໃຫ້ຄຳຕິຊົມພະນັກງານແພດແຕ່ລະບຸກຄົນເວລາໃດ?",
-            "12": "12. ຫຼັງຈາກຕື່ມຂໍ້ມູນໃສ່ແບບຟອມການໃຫ້ຄຳຕິຊົມພະນັກງານສຳເລັດແລ້ວ ຄວນເຮັດແນວໃດຕໍ່:",
-            "13": "13. ແຜນປະຕິບັດງານຂອງສຸກສາລາມີໄວ້ເພື່ອຫຍັງ?",
-            "14": "14. ທ່ານຄວນເຮັດແນວໃດກັບແບບຟອມ clinical vignette ຫຼື ແບບຟອມສັງເກດໂດຍກົງທີ່ຕື່ມສຳເລັດແລ້ວ?",
-            "15": "15. ແບບຟອມລາຍງານ CSS ທີ່ຕື່ມສຳເລັດແລ້ວຄວນມອບໃຫ້ໃຜ?"
-        };
+                <div class="bg-green-50 text-green-800 p-3 rounded-lg text-xs md:text-sm flex gap-2 items-start border border-green-200">
+                    <i class="ph-fill ph-lightbulb text-lg text-green-600"></i>
+                    <div>
+                        <strong>Smart Split (ແນະນຳ):</strong> ລະບົບຈະແປງໄຟລ໌ເປັນ .wav ແລະ ຕັດທຸກໆ 10 ນາທີ ໂດຍມີການ <strong>Overlap (ເຫຼື້ອມເວລາ) 5 ວິນາທີ</strong> ເພື່ອບໍ່ໃຫ້ຄຳເວົ້າຂາດຫາຍ. (ອາດໃຊ້ເວລາປະມວນຜົນຈັກໜ່ອຍສຳລັບໄຟລ໌ຍາວ).
+                    </div>
+                </div>
 
-        let currentLang = 'en';
-        let parsedDataCache = null; // Store data to re-render charts on lang switch
-        let chartsInstance = {}; // Store chart instances to destroy before re-rendering
-        let provinceKey = null; // Store the column name for province
+                <button type="button" onclick="splitFile()" id="mainSplitBtn"
+                    class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-md">
+                    <i class="ph ph-scissors"></i> ເລີ່ມປະມວນຜົນ ແລະ ແບ່ງໄຟລ໌
+                </button>
+            </div>
 
-        function setLanguage(lang) {
-            currentLang = lang;
-            
-            // Update Toggle UI
-            if(lang === 'en') {
-                document.getElementById('lang-en').classList.replace('text-slate-500', 'text-slate-800');
-                document.getElementById('lang-en').classList.add('bg-white', 'shadow-sm');
-                document.getElementById('lang-lo').classList.replace('text-slate-800', 'text-slate-500');
-                document.getElementById('lang-lo').classList.remove('bg-white', 'shadow-sm');
-            } else {
-                document.getElementById('lang-lo').classList.replace('text-slate-500', 'text-slate-800');
-                document.getElementById('lang-lo').classList.add('bg-white', 'shadow-sm');
-                document.getElementById('lang-en').classList.replace('text-slate-800', 'text-slate-500');
-                document.getElementById('lang-en').classList.remove('bg-white', 'shadow-sm');
-            }
-
-            // Update Text Elements
-            document.querySelectorAll('[data-i18n]').forEach(el => {
-                const key = el.getAttribute('data-i18n');
-                if (translations[lang][key]) {
-                    el.textContent = translations[lang][key];
-                }
-            });
-
-            // Update dynamically generated select option if exists
-            const allProvOption = document.querySelector('#province-filter option[value="all"]');
-            if (allProvOption) {
-                allProvOption.textContent = translations[lang]['allProvinces'];
-            }
-
-            // Re-render charts & table if data exists
-            if (parsedDataCache) {
-                applyFiltersAndRender();
-            }
-        }
-
-        function t(key) {
-            return translations[currentLang][key];
-        }
-
-        // Set Print Date
-        document.getElementById('print-date').textContent = new Date().toLocaleDateString();
-
-        // -------------------------
-        // 2. File Handling Logic
-        // -------------------------
-        const dropZone = document.getElementById('drop-zone');
-        const fileInput = document.getElementById('file-upload');
-
-        dropZone.addEventListener('dragover', (e) => {
-            e.preventDefault();
-            dropZone.classList.add('drag-over');
-        });
-
-        dropZone.addEventListener('dragleave', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('drag-over');
-        });
-
-        dropZone.addEventListener('drop', (e) => {
-            e.preventDefault();
-            dropZone.classList.remove('drag-over');
-            if (e.dataTransfer.files.length) {
-                handleFile(e.dataTransfer.files[0]);
-            }
-        });
-
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length) {
-                handleFile(e.target.files[0]);
-            }
-        });
-
-        function handleFile(file) {
-            const reader = new FileReader();
-            
-            reader.onload = function(e) {
-                try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, {type: 'array'});
-                    const firstSheetName = workbook.SheetNames[0];
-                    const worksheet = workbook.Sheets[firstSheetName];
-                    const json = XLSX.utils.sheet_to_json(worksheet, { defval: "" });
+            <div class="col-span-1 bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col h-full">
+                <h3 class="font-bold text-slate-700 mb-3 flex items-center gap-2">
+                    <i class="ph-fill ph-download-simple"></i> ໄຟລ໌ທີ່ແບ່ງແລ້ວ & ແກະສຽງ
+                </h3>
+                <div id="splitResults" class="space-y-4 flex-grow overflow-y-auto max-h-[500px] pr-2">
+                    <p class="text-sm text-slate-400 italic text-center mt-8">ເລືອກໄຟລ໌ ແລະ ກົດແບ່ງ ເພື່ອສະແດງຜົນຢູ່ບ່ອນນີ້</p>
+                </div>
+                
+                <div id="exportSection" class="hidden mt-4 pt-4 border-t border-slate-200 space-y-4">
+                    <button type="button" onclick="combineTranscripts()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 shadow">
+                        <i class="ph-fill ph-rows"></i> ລວມຂໍ້ຄວາມທີ່ແກະແລ້ວ
+                    </button>
                     
-                    if (validateData(json)) {
-                        document.getElementById('error-message').classList.add('hidden');
-                        document.getElementById('upload-section').classList.add('hidden');
-                        document.getElementById('dashboard-section').classList.replace('hidden', 'flex');
-                        
-                        // Show clear button
-                        document.getElementById('clear-btn').classList.remove('hidden');
-                        document.getElementById('clear-btn').classList.add('flex');
-                        
-                        parsedDataCache = json;
-                        populateProvinceFilter(json);
-                        applyFiltersAndRender();
-                    } else {
-                        showError(t('errorMissingCols'));
+                    <div id="combinedContainer" class="hidden space-y-3">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">ຂໍ້ຄວາມລວມທັງໝົດ</label>
+                            <textarea id="combinedTextarea" class="w-full h-64 p-4 text-sm border border-slate-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-blue-500 resize-y shadow-inner"></textarea>
+                        </div>
+                        <button type="button" onclick="exportCombinedToWord()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-lg">
+                            <i class="ph-fill ph-file-doc"></i> Export ຂໍ້ຄວາມເປັນ Word
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ເຄື່ອງມືຕັດສຽງຕົວຢ່າງ (Voice Sample Extractor) -->
+    <div class="max-w-5xl w-full bg-white rounded-2xl shadow-xl overflow-hidden p-6 md:p-8">
+        <div class="mb-6 border-b border-slate-200 pb-4">
+            <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                <i class="ph-fill ph-waveform text-purple-500"></i>
+                ເຄື່ອງມືຕັດສຽງຕົວຢ່າງຜູ້ເວົ້າ (Speaker Sample Extractor)
+            </h2>
+            <p class="text-slate-500 text-sm mt-2">ອັບໂຫຼດໄຟລ໌ສຽງເຕັມ, ຟັງເພື່ອຫາຊ່ວງເວລາທີ່ຜູ້ເວົ້າກຳລັງເວົ້າ, ແລ້ວລະບົບຈະອັດສຽງສະເພາະຊ່ວງນັ້ນແລ້ວຕັດອອກເປັນໄຟລ໌ຕົວຢ່າງພ້ອມເພີ່ມເຂົ້າໄປໃນ Prompt ໃຫ້ອັດຕະໂນມັດ.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">1. ເລືອກໄຟລ໌ສຽງ/ວິດີໂອຫຼັກ</label>
+                    <input type="file" id="sampleAudioFile" accept="audio/*,video/*" onchange="loadAudioPreview(event)"
+                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
+                </div>
+
+                <div id="audioPreviewContainer" class="hidden space-y-4">
+                    <audio id="audioPlayer" controls class="w-full rounded-lg bg-slate-100"></audio>
+                    <div class="flex flex-col gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                        <p class="text-xs text-slate-500 font-semibold text-center mb-1">ຫຼິ້ນສຽງແລ້ວກົດປຸ່ມເພື່ອກຳນົດຊ່ວງເວລາທີ່ຕ້ອງການຕັດ</p>
+                        <div class="flex items-center justify-between gap-4">
+                            <div class="flex-1 text-center">
+                                <button type="button" onclick="setInitialTime('cutStartDisplay', 'cutStart')" class="w-full mb-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm">
+                                    <i class="ph-fill ph-map-pin"></i> ເລີ່ມຕົ້ນທີ່ນີ້
+                                </button>
+                                <div class="text-sm font-mono bg-white border border-slate-300 rounded py-1 px-2 text-slate-700 shadow-inner">
+                                    <span id="cutStartDisplay">0.0</span> ວິ
+                                </div>
+                                <input type="hidden" id="cutStart" value="0">
+                            </div>
+                            <div class="flex-1 text-center">
+                                <button type="button" onclick="setInitialTime('cutEndDisplay', 'cutEnd')" class="w-full mb-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm">
+                                    <i class="ph-fill ph-flag-checkered"></i> ສິ້ນສຸດທີ່ນີ້
+                                </button>
+                                <div class="text-sm font-mono bg-white border border-slate-300 rounded py-1 px-2 text-slate-700 shadow-inner">
+                                    <span id="cutEndDisplay">10.0</span> ວິ
+                                </div>
+                                <input type="hidden" id="cutEnd" value="10">
+                            </div>
+                        </div>
+                        <div class="text-center text-xs text-slate-600 mt-2 bg-indigo-50 py-1 rounded border border-indigo-100">
+                            ຄວາມຍາວສຽງຕົວຢ່າງ: <span id="durationDisplay" class="font-bold text-indigo-700 text-sm">10.0</span> ວິນາທີ
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="space-y-4 bg-purple-50 p-4 rounded-xl border border-purple-100">
+                <h3 class="font-bold text-slate-700 mb-2">2. ລະບຸປະເພດ ແລະ ຊື່ຜູ້ເວົ້າ</h3>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">ປະເພດ (Role)</label>
+                    <select id="sampleRole" class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-purple-500">
+                        <option value="ຜູ້ຖາມ (Moderator)">ຜູ້ຖາມ (Moderator)</option>
+                        <option value="ຜູ້ເຈາະຈີ້ມ (Prober)">ຜູ້ເຈາະຈີ້ມ (Prober/Interviewer)</option>
+                        <option value="ຜູ້ຕອບ (Respondent)" selected>ຜູ້ຕອບ (Respondent)</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">ຊື່ ຫຼື ນາມແຝງ</label>
+                    <input type="text" id="sampleName" placeholder="ເຊັ່ນ: ທ້າວ ສົມດີ, ປ້າ ແກ້ວ..." class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-purple-500">
+                </div>
+
+                <div class="bg-white p-3 rounded text-xs text-slate-600 border border-purple-200 mt-2">
+                    <i class="ph-fill ph-info text-purple-500"></i> ລະບົບຈະຫຼິ້ນສຽງຕາມຊ່ວງເວລາທີ່ກຳນົດ ແລະ ອັດສຽງດັ່ງກ່າວເປັນໄຟລ໌ໃໝ່ (Real-time).
+                </div>
+
+                <button type="button" onclick="extractSampleAndAdd()" id="extractBtn"
+                    class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 mt-4 opacity-50 cursor-not-allowed" disabled>
+                    <i class="ph ph-scissors"></i> ຕັດສຽງ, ດາວໂຫຼດ ແລະ ເພີ່ມເຂົ້າ Prompt
+                </button>
+                <div id="extractStatus" class="text-sm font-semibold text-center text-purple-700 hidden mt-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script>
+        window.audioChunksData = [];
+
+        function addSpeaker(roleValue = 'ຜູ້ຕອບ (Respondent)', nameValue = '', fileValue = '', fileObj = null) {
+            const container = document.getElementById('speakersContainer');
+            const row = document.createElement('div');
+            row.className = 'flex gap-2 items-center bg-white p-2 rounded border border-slate-200';
+            
+            const isMod = roleValue.includes('Moderator');
+            const isProber = roleValue.includes('Prober');
+            const isOther = !isMod && !isProber && !roleValue.includes('Respondent');
+
+            row.innerHTML = `
+                <select class="w-1/3 px-2 py-2 text-sm border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 outline-none speaker-role">
+                    <option value="ຜູ້ຖາມ (Moderator)" ${isMod ? 'selected' : ''}>ຜູ້ຖາມ</option>
+                    <option value="ຜູ້ເຈາະຈີ້ມ (Prober)" ${isProber ? 'selected' : ''}>ຜູ້ເຈາະຈີ້ມ</option>
+                    <option value="ຜູ້ຕອບ (Respondent)" ${(!isMod && !isProber && !isOther) ? 'selected' : ''}>ຜູ້ຕອບ</option>
+                    <option value="ອື່ນໆ (Other)" ${isOther ? 'selected' : ''}>ອື່ນໆ</option>
+                </select>
+                <input type="text" placeholder="ຊື່/ນາມແຝງ" value="${nameValue}" class="w-1/3 px-3 py-2 text-sm border border-slate-300 rounded-lg focus:ring-1 focus:ring-blue-500 outline-none speaker-name">
+                
+                <div class="w-1/3 relative flex items-center">
+                    <input type="file" accept="audio/*,video/*" class="absolute inset-0 w-full h-full opacity-0 cursor-pointer speaker-file" onchange="this.nextElementSibling.querySelector('span').innerText = this.files[0] ? this.files[0].name : 'ອັບໂຫຼດສຽງຕົວຢ່າງ'; generatePrompt();">
+                    <div class="w-full px-3 py-2 text-sm border border-slate-300 rounded-lg bg-slate-50 text-slate-500 truncate pointer-events-none speaker-file-label font-medium flex items-center justify-between">
+                        <span>${fileValue || 'ອັບໂຫຼດສຽງຕົວຢ່າງ'}</span>
+                        <i class="ph ph-upload-simple"></i>
+                    </div>
+                </div>
+
+                <button type="button" onclick="this.parentElement.remove(); generatePrompt();" class="p-2 text-red-500 hover:bg-red-100 rounded-lg transition-colors" title="ລຶບ"><i class="ph ph-trash text-lg"></i></button>
+            `;
+            
+            container.appendChild(row);
+
+            if (fileObj) {
+                const fileInput = row.querySelector('.speaker-file');
+                const dt = new DataTransfer();
+                dt.items.add(fileObj);
+                fileInput.files = dt.files;
+            }
+
+            row.querySelectorAll('input[type="text"], select').forEach(input => {
+                input.addEventListener('input', generatePrompt);
+                input.addEventListener('change', generatePrompt);
+            });
+            generatePrompt();
+        }
+
+        function generatePrompt() {
+            const topic = document.getElementById('topic').value || '[ກະລຸນາໃສ່ຫົວຂໍ້ການສົນທະນາ]';
+            const speakers = document.getElementById('speakers').value || '[ບໍ່ລະບຸ]';
+            const lang = document.getElementById('promptLang').value;
+            const format = document.getElementById('format').value;
+            const speakerId = document.getElementById('speakerId').value;
+            const extra = document.getElementById('extra').value;
+
+            const speakerRoles = document.querySelectorAll('.speaker-role');
+            const speakerNames = document.querySelectorAll('.speaker-name');
+            const speakerFiles = document.querySelectorAll('.speaker-file');
+            let speakerProfilesText = "";
+            let profilesList = [];
+
+            speakerRoles.forEach((roleInput, index) => {
+                let role = roleInput.value;
+                if(lang === 'en') {
+                    if(role.includes('Moderator')) role = 'Moderator';
+                    else if(role.includes('Prober')) role = 'Prober/Interviewer';
+                    else if(role.includes('Respondent')) role = 'Respondent';
+                    else role = 'Other Speaker';
+                }
+
+                const name = speakerNames[index].value.trim();
+                let file = "";
+                const fileInput = speakerFiles[index];
+                if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                    file = fileInput.files[0].name;
+                } else if (fileInput && !fileInput.nextElementSibling.innerText.includes('ອັບໂຫຼດສຽງ')) {
+                    file = fileInput.nextElementSibling.innerText;
+                }
+                
+                if (name || file) {
+                    let desc = name ? name : (lang === 'en' ? 'Unidentified' : 'ບໍ່ໄດ້ລະບຸຊື່');
+                    if (file) {
+                        desc += lang === 'en' ? ` (Voice Sample File: ${file})` : ` (ອ້າງອີງສຽງຈາກໄຟລ໌: ${file})`;
                     }
-                } catch (err) {
-                    console.error(err);
-                    showError(t('errorFileRead'));
+                    profilesList.push(`  * ${role}: ${desc}`);
                 }
-            };
-            
-            reader.readAsArrayBuffer(file);
-        }
+            });
 
-        function showError(msg) {
-            const errorEl = document.getElementById('error-message');
-            document.getElementById('error-text').textContent = msg;
-            errorEl.classList.remove('hidden');
-        }
-
-        function validateData(data) {
-            if (!data || data.length === 0) return false;
-            const keys = Object.keys(data[0]);
-            const hasTestType = keys.some(k => k.toLowerCase().includes('pre or post'));
-            const hasScore = keys.some(k => k.toLowerCase().includes('score'));
-            return hasTestType && hasScore;
-        }
-
-        // -------------------------
-        // 3. Clear Data Logic
-        // -------------------------
-        function clearData() {
-            // Reset Data
-            parsedDataCache = null;
-            provinceKey = null;
-            document.getElementById('file-upload').value = '';
-            
-            // Toggle visibility back to upload screen
-            document.getElementById('dashboard-section').classList.replace('flex', 'hidden');
-            document.getElementById('filter-section').classList.remove('flex');
-            document.getElementById('filter-section').classList.add('hidden');
-            document.getElementById('upload-section').classList.remove('hidden');
-            
-            // Hide clear button
-            document.getElementById('clear-btn').classList.remove('flex');
-            document.getElementById('clear-btn').classList.add('hidden');
-            
-            // Destroy existing charts to free memory
-            for (let id in chartsInstance) {
-                if (chartsInstance[id]) {
-                    chartsInstance[id].destroy();
+            if (profilesList.length > 0) {
+                if (lang === 'en') {
+                    speakerProfilesText = `- Speaker Profiles & Audio References:\n${profilesList.join('\n')}\n  (IMPORTANT: Please use these exact IDs/Names. If an audio sample file is mentioned above, listen to it first to memorize their voice before transcribing the main audio.)\n`;
+                    speakerProfilesText += `- Output Name Format: ONLY use the raw names listed above followed by a colon (e.g., "Name:"). DO NOT use markdown (**Name:**) and DO NOT include roles (e.g., Moderator/Respondent) in the output text.\n`;
+                } else {
+                    speakerProfilesText = `- ຂໍ້ມູນຕົວຕົນຜູ້ເວົ້າ ແລະ ອ້າງອີງສຽງຕົວຢ່າງ:\n${profilesList.join('\n')}\n  (ສຳຄັນ: ກະລຸນາໃຊ້ຊື່ ຫຼື ID ເຫຼົ່ານີ້ໃນການແຍກຜູ້ເວົ້າ. ຫາກມີການອ້າງອີງເຖິງ "ໄຟລ໌ສຽງຕົວຢ່າງ" (Sample) ກະລຸນາຟັງໄຟລ໌ນັ້ນເພື່ອຈື່ຈຳສຽງຂອງພວກເຂົາກ່ອນ ແລ້ວຈຶ່ງແກະໄຟລ໌ສຽງຫຼັກ.)\n`;
+                    speakerProfilesText += `- ຮູບແບບຊື່ໃນຜົນລັບ: ໃຫ້ພິມພຽງແຕ່ຊື່ທີ່ລະບຸໄວ້ຂ້າງເທິງ ຕາມດ້ວຍຈ້ຳສອງເມັດ (ຕົວຢ່າງ "ທ້າວ ກ:"). ຫ້າມໃສ່ຕົວໜາ (**) ແລະ ຫ້າມໃສ່ບົດບາດ (ເຊັ່ນ ຜູ້ຖາມ/ຜູ້ຕອບ) ເດັດຂາດ.\n`;
                 }
             }
-            chartsInstance = {};
-        }
 
-        // -------------------------
-        // 4. Data Processing & Rendering
-        // -------------------------
-        function populateProvinceFilter(data) {
-            if (!data || data.length === 0) return;
-            const keys = Object.keys(data[0]);
-            provinceKey = keys.find(k => k.toLowerCase() === 'province') || keys.find(k => k.toLowerCase().includes('province'));
-            
-            if (!provinceKey) return; // Hidden by default, stay hidden if no province column found
+            let promptText = "";
 
-            const provinces = new Set();
-            data.forEach(row => {
-                const p = row[provinceKey];
-                if (p && String(p).trim() !== "") {
-                    provinces.add(String(p).trim());
+            if (lang === 'en') {
+                promptText = `You are an expert audio transcriber and qualitative data analyst specializing in Focus Group Discussions (FGD).\n\n`;
+                promptText += `Task: Please transcribe the provided FGD audio/transcript accurately.\n\n`;
+                promptText += `Context & Topic: ${topic}\n`;
+                promptText += `Number of Participants: Approximately ${speakers} speakers.\n\n`;
+                promptText += `Transcription Guidelines:\n`;
+                
+                if(format === 'verbatim') {
+                    promptText += `- Format: Strict Verbatim. Include all spoken words, including filler words, stutters, and background reactions.\n`;
+                } else if(format === 'clean') {
+                    promptText += `- Format: Clean Read. Remove unnecessary filler words and stutters to make the text readable, but DO NOT alter the core meaning.\n`;
+                } else {
+                    promptText += `- Format: Summary. Provide a detailed summary of the key themes, insights, and varying opinions discussed.\n`;
                 }
-            });
 
-            const select = document.getElementById('province-filter');
-            select.innerHTML = `<option value="all" data-i18n="allProvinces">${t('allProvinces')}</option>`;
-            
-            Array.from(provinces).sort().forEach(prov => {
-                const opt = document.createElement('option');
-                opt.value = prov;
-                opt.textContent = prov;
-                select.appendChild(opt);
-            });
-            
-            document.getElementById('filter-section').classList.remove('hidden');
-            document.getElementById('filter-section').classList.add('flex');
-        }
-
-        function applyFiltersAndRender() {
-            if (!parsedDataCache) return;
-            
-            const select = document.getElementById('province-filter');
-            const selectedProv = select.value;
-            
-            let filteredData = parsedDataCache;
-            if (selectedProv !== 'all' && provinceKey) {
-                filteredData = parsedDataCache.filter(row => String(row[provinceKey]).trim() === selectedProv);
-            }
-            
-            renderDashboard(filteredData);
-        }
-
-        function renderDashboard(data) {
-            if(!data || data.length === 0) return; // Prevent crash if filtered entirely
-            
-            // Find Exact Column Keys
-            const keys = Object.keys(parsedDataCache[0]); // Use full cache to get keys properly
-            const testTypeKey = keys.find(k => k.toLowerCase().includes('pre or post')) || keys[0];
-            const scoreKey = keys.find(k => k.toLowerCase().includes('score')) || keys[0];
-            const genderKey = keys.find(k => k.toLowerCase() === 'gender');
-            
-            // Extract Question Columns (keys starting with a number e.g. "1. When...")
-            const questionKeys = keys.filter(k => /^\d+\./.test(k));
-
-            // Clean data (Remove empty rows)
-            const validData = data.filter(row => row[testTypeKey] && String(row[testTypeKey]).trim() !== "");
-
-            // Split into Pre and Post
-            const preData = validData.filter(row => String(row[testTypeKey]).toLowerCase().includes('pre'));
-            const postData = validData.filter(row => String(row[testTypeKey]).toLowerCase().includes('post'));
-
-            // 1. Calculate KPIs
-            const avgPre = preData.length > 0 
-                ? preData.reduce((sum, row) => sum + (parseFloat(row[scoreKey]) || 0), 0) / preData.length 
-                : 0;
-            
-            const avgPost = postData.length > 0 
-                ? postData.reduce((sum, row) => sum + (parseFloat(row[scoreKey]) || 0), 0) / postData.length 
-                : 0;
-
-            const improvement = avgPre > 0 ? ((avgPost - avgPre) / avgPre) * 100 : 0;
-
-            // Calculate Gender Distribution for KPI and Chart
-            const genderCounts = { male: 0, female: 0, unknown: 0 };
-            validData.forEach(row => {
-                const g = String(row[genderKey] || '').toLowerCase().trim();
-                if (g === 'male' || g === 'm') genderCounts.male++;
-                else if (g === 'female' || g === 'f') genderCounts.female++;
-                else genderCounts.unknown++;
-            });
-
-            document.getElementById('kpi-participants').textContent = validData.length;
-            document.getElementById('kpi-breakdown-prepost').textContent = `${t('preTestLabel')}: ${preData.length} | ${t('postTestLabel')}: ${postData.length}`;
-            document.getElementById('kpi-breakdown-gender').textContent = `${t('male')}: ${genderCounts.male} | ${t('female')}: ${genderCounts.female} | ${t('unknown')}: ${genderCounts.unknown}`;
-            document.getElementById('kpi-pre').textContent = avgPre.toFixed(1);
-            document.getElementById('kpi-post').textContent = avgPost.toFixed(1);
-            
-            const impEl = document.getElementById('kpi-improvement');
-            impEl.textContent = improvement > 0 ? `+${improvement.toFixed(1)}%` : `${improvement.toFixed(1)}%`;
-            impEl.className = improvement > 0 ? "text-2xl font-bold text-green-600" : "text-2xl font-bold text-red-600";
-
-            // 2. Prepare Charts
-
-            // Overall Bar Chart
-            renderBarChart('overallChart', {
-                labels: [t('preTestLabel'), t('postTestLabel')],
-                datasets: [{
-                    label: t('avgPreTest'),
-                    data: [avgPre.toFixed(2), avgPost.toFixed(2)],
-                    backgroundColor: ['#f97316', '#22c55e'], // Orange for pre, Green for post
-                    borderRadius: 6
-                }]
-            }, {
-                plugins: { legend: { display: false } },
-                scales: { y: { beginAtZero: true, max: 15 } } 
-            });
-
-            // 3. Render Question Table
-            const tbody = document.getElementById('questionTableBody');
-            tbody.innerHTML = ''; // Clear previous data
-            const questionStats = []; // Array to track for recommendations
-
-            // Helper function to translate dynamic questions based on their starting number
-            const getLocalizedQuestion = (qKey) => {
-                if (currentLang === 'en') return qKey.replace(/^"?|"?$/g, '');
-                const match = qKey.match(/^"?(\d+)\./);
-                if (match && questionTranslations[match[1]]) {
-                    return questionTranslations[match[1]];
+                if(speakerId === 'numbered') {
+                    promptText += `- Speaker Identification: Identify moderator as "Moderator:" and participants sequentially as "Speaker 1:", etc.\n`;
+                } else if(speakerId === 'names') {
+                    promptText += `- Speaker Identification: Try to identify participants by their actual names if mentioned. If unknown, use "Speaker [Number]:".\n`;
+                } else {
+                    promptText += `- Speaker Identification: Not strictly required. Just indicate when a new person starts speaking using a dash (-).\n`;
                 }
-                return qKey.replace(/^"?|"?$/g, '');
-            };
 
-            questionKeys.forEach((qKey) => {
-                // Calculate sum and average for this specific question
-                const preSum = preData.reduce((sum, row) => sum + (parseFloat(row[qKey]) || 0), 0);
-                const postSum = postData.reduce((sum, row) => sum + (parseFloat(row[qKey]) || 0), 0);
-                
-                const preAvg = preData.length ? (preSum / preData.length) : 0;
-                const postAvg = postData.length ? (postSum / postData.length) : 0;
-                
-                const diffAvg = postAvg - preAvg;
+                if (speakerProfilesText) promptText += speakerProfilesText;
+                if(extra.trim() !== "") promptText += `- Additional Instructions: ${extra}\n`;
 
-                // Formatting values to percentages
-                const preFormat = (preAvg * 100).toFixed(1) + '%';
-                const postFormat = (postAvg * 100).toFixed(1) + '%';
-                const diffFormat = (diffAvg > 0 ? '+' : '') + (diffAvg * 100).toFixed(1) + '%';
-                
-                // Color formatting for difference
-                let diffColorClass = 'text-slate-600';
-                if (diffAvg > 0) diffColorClass = 'text-green-600';
-                if (diffAvg < 0) diffColorClass = 'text-red-600';
-
-                const localizedQuestion = getLocalizedQuestion(qKey);
-
-                const tr = document.createElement('tr');
-                tr.className = 'hover:bg-slate-50 transition-colors';
-                tr.innerHTML = `
-                    <td class="px-6 py-4 text-sm text-slate-800 whitespace-normal min-w-[300px]">
-                        ${localizedQuestion}
-                    </td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-slate-600 font-medium">${preFormat}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center text-slate-600 font-medium">${postFormat}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm text-center font-bold ${diffColorClass}">${diffFormat}</td>
-                `;
-                tbody.appendChild(tr);
-
-                // Collect for recommendations
-                questionStats.push({
-                    question: localizedQuestion,
-                    post: postAvg
-                });
-            });
-
-            // 4. Render Recommendations Section
-            const lowScoring = questionStats.filter(q => q.post < 0.75).sort((a, b) => a.post - b.post);
-            const recList = document.getElementById('recommendationList');
-            const recEmpty = document.getElementById('recommendationEmpty');
-
-            recList.innerHTML = '';
-            if(lowScoring.length > 0) {
-                recEmpty.classList.add('hidden');
-                recList.classList.remove('hidden');
-                
-                lowScoring.forEach(item => {
-                    const postFormat = (item.post * 100).toFixed(1) + '%';
-                    const recDiv = document.createElement('div');
-                    recDiv.className = 'bg-white p-4 rounded-lg border border-orange-200 shadow-sm';
-                    recDiv.innerHTML = `
-                        <div class="flex justify-between items-start mb-2">
-                            <h4 class="font-medium text-slate-800 text-sm flex-1 pr-4">${item.question}</h4>
-                            <span class="bg-red-100 text-red-700 text-xs font-bold px-2 py-1 rounded">Score: ${postFormat}</span>
-                        </div>
-                        <div class="text-sm text-slate-600 bg-slate-50 p-3 rounded border border-slate-100">
-                            <strong>${t('recAction')}:</strong> ${t('genericAction')}
-                        </div>
-                    `;
-                    recList.appendChild(recDiv);
-                });
+                promptText += `\nOutput Language: Please generate the output text in the ORIGINAL LANGUAGE spoken in the audio, unless explicitly told to translate.\n\n`;
             } else {
-                recEmpty.classList.remove('hidden');
-                recList.classList.add('hidden');
-            }
-        }
-
-        // -------------------------
-        // 5. Chart.js Helpers
-        // -------------------------
-        Chart.defaults.font.family = "'Inter', 'Noto Sans Lao', sans-serif";
-        Chart.defaults.color = '#64748b';
-
-        function destroyChart(canvasId) {
-            if (chartsInstance[canvasId]) {
-                chartsInstance[canvasId].destroy();
-            }
-        }
-
-        function renderBarChart(canvasId, data, options = {}) {
-            destroyChart(canvasId);
-            const ctx = document.getElementById(canvasId).getContext('2d');
-            chartsInstance[canvasId] = new Chart(ctx, {
-                type: 'bar',
-                data: data,
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    ...options
+                promptText = `ຈົ່ງເຮັດໜ້າທີ່ເປັນຜູ້ຊ່ຽວຊານດ້ານການແກະສຽງ ແລະ ນັກວິເຄາະຂໍ້ມູນຄຸນນະພາບ (Qualitative Data) ທີ່ມີຄວາມຊ່ຽວຊານໃນການເຮັດ Focus Group Discussion (FGD).\n\n`;
+                promptText += `ໜ້າທີ່ຂອງທ່ານ: ກະລຸນາແກະສຽງ/ສະຫຼຸບຂໍ້ມູນຈາກໄຟລ໌ສຽງ FGD ທີ່ແນບມານີ້ໃຫ້ຖືກຕ້ອງທີ່ສຸດ.\n\n`;
+                promptText += `ບໍລິບົດ ແລະ ຫົວຂໍ້ການສົນທະນາ: ${topic}\n`;
+                promptText += `ຈຳນວນຜູ້ເຂົ້າຮ່ວມ: ປະມານ ${speakers} ຄົນ.\n\n`;
+                promptText += `ຂໍ້ກຳນົດໃນການແກະສຽງ:\n`;
+                
+                if(format === 'verbatim') {
+                    promptText += `- ຮູບແບບ: ແກະທຸກຄຳເວົ້າ (Strict Verbatim). ພິມທຸກຄຳທີ່ໄດ້ຍິນ ລວມເຖິງຄຳຟຸມເຟືອຍ ແລະ ສຽງໃນສະຖານະການ.\n`;
+                } else if(format === 'clean') {
+                    promptText += `- ຮູບແບບ: Clean Read. ຕັດຄຳຟຸມເຟືອຍ ແລະ ອາການເວົ້າສະດຸດອອກ ເພື່ອໃຫ້ອ່ານເຂົ້າໃຈງ່າຍຂຶ້ນ ແຕ່ຫ້າມປ່ຽນແປງຄວາມໝາຍ.\n`;
+                } else {
+                    promptText += `- ຮູບແບບ: Summary (ສະຫຼຸບ). ສະຫຼຸບປະເດັນສຳຄັນ, ຄວາມຄິດເຫັນທີ່ແຕກຕ່າງກັນ ແບ່ງເປັນຫົວຂໍ້ຍ່ອຍຢ່າງຊັດເຈນ.\n`;
                 }
+
+                if(speakerId === 'numbered') {
+                    promptText += `- ການລະບຸຜູ້ເວົ້າ: ໃຫ້ແຍກຜູ້ປະສານງານເປັນ "ຜູ້ຖາມ/Moderator:" ແລະ ຜູ້ເຂົ້າຮ່ວມເປັນ "ຜູ້ເວົ້າ 1:", ຕາມລຳດັບ.\n`;
+                } else if(speakerId === 'names') {
+                    promptText += `- ການລະບຸຜູ້ເວົ້າ: ພະຍາຍາມລະບຸຊື່ຂອງຜູ້ເວົ້າຫາກມີການເອີ້ນຊື່ກັນ. ຫາກບໍ່ຮູ້ຊື່ໃຫ້ໃຊ້ "ຜູ້ເວົ້າທີ [ລຳດັບ]:".\n`;
+                } else {
+                    promptText += `- ການລະບຸຜູ້ເວົ້າ: ບໍ່ຈຳເປັນຕ້ອງລະບຸຊື່, ພຽງແຕ່ໃຊ້ເຄື່ອງໝາຍຂີດ (-) ເພື່ອສະແດງວ່າມີການປ່ຽນຄົນເວົ້າກໍພໍ.\n`;
+                }
+
+                if (speakerProfilesText) promptText += speakerProfilesText;
+                if(extra.trim() !== "") promptText += `- ຄຳສັ່ງເພີ່ມເຕີມ: ${extra}\n`;
+
+                promptText += `\nພາສາຂອງຜົນລັບ: ກະລຸນາພິມຜົນລັບອອກມາເປັນພາສາລາວ (ຫຼື ພາສາຕົ້ນສະບັບທີ່ໃຊ້ລົມກັນ).\n\n`;
+            }
+
+            const outputBox = document.getElementById('output');
+            if (outputBox) outputBox.value = promptText;
+        }
+
+        function copyToClipboard() {
+            const outputBox = document.getElementById('output');
+            if (!outputBox || !outputBox.value) return;
+
+            const fallbackCopy = () => {
+                const temp = document.createElement("textarea");
+                temp.value = outputBox.value;
+                temp.style.position = 'fixed';
+                temp.style.top = '0';
+                temp.style.left = '0';
+                temp.style.opacity = '0';
+                document.body.appendChild(temp);
+                temp.focus();
+                temp.select();
+                try {
+                    document.execCommand('copy');
+                    showToast();
+                } catch (err) {
+                    alert('ບໍ່ສາມາດຄັດລອກໄດ້. ກະລຸນາກັອບປີ້ດ້ວຍຕົນເອງ.');
+                }
+                document.body.removeChild(temp);
+            };
+
+            if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(outputBox.value)
+                    .then(() => showToast())
+                    .catch(() => fallbackCopy());
+            } else {
+                fallbackCopy();
+            }
+        }
+
+        document.querySelectorAll('#promptForm input, #promptForm select, #promptForm textarea').forEach(element => {
+            if(!element.classList.contains('speaker-role') && !element.classList.contains('speaker-name') && !element.classList.contains('speaker-file')) {
+                element.addEventListener('input', generatePrompt);
+                element.addEventListener('change', generatePrompt);
+            }
+        });
+
+        function showToast() {
+            const toast = document.getElementById('toast');
+            toast.classList.remove('opacity-0');
+            toast.classList.add('opacity-100');
+            setTimeout(() => {
+                toast.classList.remove('opacity-100');
+                toast.classList.add('opacity-0');
+            }, 2000);
+        }
+
+        // --- ລະບົບແປງສຽງເປັນ WAV ທີ່ສົມບູນ (Wav Encoder) ---
+        function audioBufferToWav(buffer, startOffset, length) {
+            const numOfChan = 1; // ບັງຄັບເປັນ Mono ເພື່ອຫຼຸດຂະໜາດໄຟລ໌
+            const sampleRate = buffer.sampleRate;
+            const channelData = new Float32Array(length);
+
+            // ປະສົມສຽງທຸກຊ່ອງເຂົ້າກັນເປັນ Mono
+            const sourceChannels = buffer.numberOfChannels;
+            for (let i = 0; i < sourceChannels; i++) {
+                const chan = buffer.getChannelData(i);
+                for (let j = 0; j < length; j++) {
+                    channelData[j] += chan[startOffset + j] / sourceChannels;
+                }
+            }
+
+            const wavBuffer = new ArrayBuffer(44 + channelData.length * 2);
+            const view = new DataView(wavBuffer);
+
+            const writeString = (view, offset, string) => {
+                for (let i = 0; i < string.length; i++) {
+                    view.setUint8(offset + i, string.charCodeAt(i));
+                }
+            };
+
+            writeString(view, 0, 'RIFF');
+            view.setUint32(4, 36 + channelData.length * 2, true);
+            writeString(view, 8, 'WAVE');
+            writeString(view, 12, 'fmt ');
+            view.setUint32(16, 16, true);
+            view.setUint16(20, 1, true);
+            view.setUint16(22, numOfChan, true);
+            view.setUint32(24, sampleRate, true);
+            view.setUint32(28, sampleRate * 2, true);
+            view.setUint16(32, 2, true);
+            view.setUint16(34, 16, true);
+            writeString(view, 36, 'data');
+            view.setUint32(40, channelData.length * 2, true);
+
+            let offset = 44;
+            for (let i = 0; i < channelData.length; i++, offset += 2) {
+                let s = Math.max(-1, Math.min(1, channelData[i]));
+                view.setInt16(offset, s < 0 ? s * 0x8000 : s * 0x7FFF, true);
+            }
+
+            return new Blob([view], { type: 'audio/wav' });
+        }
+
+        // --- ຟັງຊັນແບ່ງໄຟລ໌ສຽງຫຼັກ (Splitter) ---
+        async function splitFile() {
+            const fileInput = document.getElementById('audioFile');
+            const methodInput = document.getElementById('splitMethod').value;
+            const resultsDiv = document.getElementById('splitResults');
+            const exportSection = document.getElementById('exportSection');
+            const btn = document.getElementById('mainSplitBtn');
+
+            if (!fileInput.files || fileInput.files.length === 0) {
+                resultsDiv.innerHTML = '<p class="text-sm text-red-500 font-semibold p-2">ກະລຸນາເລືອກໄຟລ໌ກ່ອນ!</p>';
+                return;
+            }
+
+            const file = fileInput.files[0];
+            resultsDiv.innerHTML = '<div class="flex flex-col items-center justify-center p-8 text-center"><i class="ph ph-spinner-gap animate-spin text-4xl text-orange-500 mb-3"></i><span class="text-sm font-bold text-slate-700">ກຳລັງປະມວນຜົນໄຟລ໌ສຽງ...</span><span class="text-xs text-slate-500 mt-1">(ກະລຸນາລໍຖ້າຈັກໜ່ອຍ ຫ້າມປິດໜ້າຈໍ)</span></div>';
+            exportSection.classList.add('hidden');
+            window.audioChunksData = [];
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+
+            try {
+                if (methodInput === 'smart') {
+                    // Smart Split (Time-based & WAV Encoding)
+                    const arrayBuffer = await file.arrayBuffer();
+                    const audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    const audioBuffer = await audioCtx.decodeAudioData(arrayBuffer);
+
+                    const chunkMinutes = 10; // ບັງຄັບຕັດທຸກໆ 10 ນາທີ
+                    const overlapSeconds = 5; // ເຫຼື້ອມເວລາ 5 ວິນາທີ
+                    
+                    const sampleRate = audioBuffer.sampleRate;
+                    const totalLength = audioBuffer.length;
+                    const stepLength = chunkMinutes * 60 * sampleRate;
+                    const overlapLength = overlapSeconds * sampleRate;
+                    
+                    const totalChunks = Math.ceil(totalLength / stepLength);
+                    resultsDiv.innerHTML = '';
+
+                    const originalName = file.name;
+                    const baseName = originalName.substring(0, originalName.lastIndexOf('.')) || originalName;
+
+                    for (let i = 0; i < totalChunks; i++) {
+                        let startOffset = i * stepLength;
+                        // ຖ້າບໍ່ແມ່ນພາກທຳອິດ ໃຫ້ຍ້ອນກັບໄປເອົາ Overlap
+                        if (i > 0) startOffset -= overlapLength;
+                        if (startOffset < 0) startOffset = 0;
+
+                        let endOffset = startOffset + stepLength + (i > 0 ? overlapLength : 0);
+                        if (endOffset > totalLength) endOffset = totalLength;
+                        
+                        const length = endOffset - startOffset;
+                        const blob = audioBufferToWav(audioBuffer, startOffset, length);
+                        const fileName = `${baseName}_part${i+1}.wav`;
+                        
+                        createChunkUI(blob, i, fileName, resultsDiv, true);
+                    }
+                } else {
+                    // Binary Split (Fallback)
+                    const chunkSize = 15 * 1024 * 1024; // 15 MB
+                    const totalChunks = Math.ceil(file.size / chunkSize);
+                    resultsDiv.innerHTML = '';
+
+                    if (totalChunks === 1) {
+                        resultsDiv.innerHTML = '<p class="text-sm text-green-600 font-semibold p-2">ໄຟລ໌ຂອງທ່ານມີຂະໜາດນ້ອຍ ບໍ່ຈຳເປັນຕ້ອງແບ່ງ!</p>';
+                        createChunkUI(file, 0, file.name, resultsDiv, false);
+                    } else {
+                        const baseName = file.name.substring(0, file.name.lastIndexOf('.')) || file.name;
+                        const ext = file.name.substring(file.name.lastIndexOf('.'));
+                        for (let i = 0; i < totalChunks; i++) {
+                            const start = i * chunkSize;
+                            const end = Math.min(start + chunkSize, file.size);
+                            const chunk = file.slice(start, end, file.type);
+                            const fileName = `${baseName}_part${i+1}${ext}`;
+                            createChunkUI(chunk, i, fileName, resultsDiv, false);
+                        }
+                    }
+                }
+                exportSection.classList.remove('hidden');
+
+            } catch (error) {
+                resultsDiv.innerHTML = `<div class="p-4 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm"><strong>ຂໍ້ຜິດພາດ:</strong> ${error.message}<br><br>ຖ້າທ່ານໃຊ້ໄຟລ໌ວິດີໂອໃຫຍ່ໆແລ້ວລະບົບຄວາມຈຳເຕັມ, ກະລຸນາລອງເລືອກ "ແບ່ງແບບໄວ (Binary Split)" ແທນ.</div>`;
+            } finally {
+                btn.disabled = false;
+                btn.classList.remove('opacity-50');
+            }
+        }
+
+        // ຟັງຊັນສ້າງ UI ຂອງແຕ່ລະສ່ວນທີ່ຖືກແບ່ງ
+        function createChunkUI(blob, index, fileName, container, isSmart) {
+            window.audioChunksData.push({ blob: blob, fileName: fileName, transcript: "" });
+            
+            const chunkDiv = document.createElement('div');
+            chunkDiv.className = "bg-white border border-slate-200 rounded-lg p-3 shadow-sm";
+            
+            const url = URL.createObjectURL(blob);
+            const sizeMB = (blob.size / 1024 / 1024).toFixed(1);
+            
+            let badge = isSmart ? `<span class="bg-green-100 text-green-700 text-[10px] px-1.5 py-0.5 rounded font-bold ml-2">WAV ສົມບູນ</span>` : '';
+            
+            chunkDiv.innerHTML = `
+                <div class="flex justify-between items-center mb-2">
+                    <span class="font-semibold text-slate-700 text-sm">ພາກທີ ${index+1} <span class="text-xs font-normal text-slate-500">(${sizeMB} MB)</span> ${badge}</span>
+                    <a href="${url}" download="${fileName}" class="text-blue-600 hover:text-blue-800 text-xs flex items-center gap-1 bg-blue-50 px-2 py-1 rounded transition-colors">
+                        <i class="ph ph-download-simple"></i> ດາວໂຫຼດ
+                    </a>
+                </div>
+                
+                <button type="button" id="transcribeBtn_${index}" onclick="transcribeChunk(${index})" class="w-full bg-slate-800 hover:bg-slate-900 text-white text-xs font-bold py-2 rounded flex items-center justify-center gap-2 transition-colors mb-2">
+                    <i class="ph ph-magic-wand"></i> ແກະສຽງ (Transcript) ດ້ວຍ AI
+                </button>
+                
+                <div id="loading_${index}" class="hidden flex flex-col items-center justify-center py-4">
+                    <i class="ph ph-spinner-gap animate-spin text-2xl text-blue-500 mb-2"></i>
+                    <span class="text-xs text-slate-500 font-semibold">AI ກຳລັງຟັງສຽງ ແລະ ແກະຂໍ້ຄວາມ...</span>
+                    <span class="text-[10px] text-slate-400 mt-1">(ອາດໃຊ້ເວລາ 1-2 ນາທີ ຂຶ້ນກັບຄວາມຍາວ)</span>
+                </div>
+                
+                <textarea id="transcriptText_${index}" class="w-full hidden h-40 p-3 text-sm border border-slate-300 rounded bg-slate-50 outline-none focus:border-blue-500 focus:bg-white resize-y shadow-inner" placeholder="ຜົນການແກະສຽງຈະສະແດງບ່ອນນີ້... ທ່ານສາມາດແກ້ໄຂໄດ້" oninput="updateTranscriptData(${index}, this.value)"></textarea>
+            `;
+            container.appendChild(chunkDiv);
+        }
+
+        function updateTranscriptData(index, value) {
+            if(window.audioChunksData[index]) {
+                window.audioChunksData[index].transcript = value;
+            }
+        }
+
+        function blobToBase64(blob) {
+            return new Promise((resolve, _) => {
+                const reader = new FileReader();
+                reader.onloadend = () => resolve(reader.result.split(',')[1]);
+                reader.readAsDataURL(blob);
             });
         }
 
-        // Initialize language
-        setLanguage('en');
+        // --- ຟັງຊັນສຳລັບການຮຽກໃຊ້ AI ແກະສຽງ ພ້ອມສົ່ງຕໍ່ບໍລິບົດ (Context Chaining) ---
+        async function transcribeChunk(index) {
+            const btn = document.getElementById(`transcribeBtn_${index}`);
+            const loading = document.getElementById(`loading_${index}`);
+            const textArea = document.getElementById(`transcriptText_${index}`);
+            
+            btn.classList.add('hidden');
+            loading.classList.remove('hidden');
+            textArea.classList.add('hidden');
 
+            try {
+                const chunkData = window.audioChunksData[index];
+                const base64Audio = await blobToBase64(chunkData.blob);
+                const mimeType = chunkData.blob.type || 'audio/wav'; 
+                
+                const mainPrompt = document.getElementById('output').value;
+                const sysInstruction = "You are a professional audio transcriber. Listen to the provided Voice Samples to identify speakers. Transcribe the MAIN AUDIO. Output ONLY the exact names provided, followed by a colon (e.g., 'ທ້າວ ກ: '). DO NOT use markdown bolding like **Name:**. DO NOT output their roles.";
+
+                let apiParts = [{ text: mainPrompt }];
+                
+                // --- ລະບົບສົ່ງຕໍ່ບໍລິບົດ (Context Chaining) ສຸດສະຫຼາດ ---
+                // ຖ້າບໍ່ແມ່ນພາກທຳອິດ ແລະ ພາກກ່ອນໜ້າແກະສຳເລັດແລ້ວ
+                if (index > 0 && window.audioChunksData[index - 1] && window.audioChunksData[index - 1].transcript) {
+                    const prevText = window.audioChunksData[index - 1].transcript;
+                    // ດຶງເອົາຂໍ້ຄວາມ 500 ຕົວອັກສອນສຸດທ້າຍຂອງພາກກ່ອນໜ້າມາເປັນ Context
+                    const contextText = prevText.substring(Math.max(0, prevText.length - 500));
+                    apiParts.push({ text: `\n\n[CRITICAL CONTEXT FROM PREVIOUS CHUNK: "...${contextText}"]\n-> IMPORTANT: Use the context above to understand what was being said right before this chunk starts. This will help you identify who is speaking and continue sentences seamlessly. DO NOT repeat the context in your output, just continue from it.`});
+                }
+                
+                // ແນບໄຟລ໌ສຽງຕົວຢ່າງຜູ້ເວົ້າ
+                const speakerRows = document.querySelectorAll('#speakersContainer > div');
+                for(let row of speakerRows) {
+                    const nameInput = row.querySelector('.speaker-name');
+                    const fileInput = row.querySelector('.speaker-file');
+                    const name = nameInput.value.trim() || 'Speaker';
+                    
+                    if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                        const sampleFile = fileInput.files[0];
+                        const base64Sample = await blobToBase64(sampleFile);
+                        apiParts.push({ text: `[Voice Sample Reference for: ${name}]` });
+                        apiParts.push({ inlineData: { mimeType: sampleFile.type || 'audio/webm', data: base64Sample } });
+                    }
+                }
+                
+                apiParts.push({ text: "\n\n--- MAIN AUDIO TO TRANSCRIBE ---\nPlease transcribe this audio chunk using the exact speaker names defined above." });
+                apiParts.push({ inlineData: { mimeType: mimeType, data: base64Audio } });
+
+                const apiKey = ""; 
+                const url = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-09-2025:generateContent?key=${apiKey}`;
+                
+                const payload = {
+                    contents: [{ parts: apiParts }],
+                    systemInstruction: { parts: [{ text: sysInstruction }] }
+                };
+
+                let responseText = "";
+                let attempts = 0;
+                const maxAttempts = 5;
+                const delays = [1000, 2000, 4000, 8000, 16000];
+
+                while (attempts < maxAttempts) {
+                    try {
+                        const response = await fetch(url, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payload)
+                        });
+
+                        if (!response.ok) {
+                            const errData = await response.json().catch(() => ({}));
+                            throw new Error(`HTTP ${response.status}: ${errData.error?.message || 'Unknown API Error'}`);
+                        }
+                        
+                        const result = await response.json();
+                        responseText = result.candidates?.[0]?.content?.parts?.[0]?.text || "[ບໍ່ພົບຂໍ້ຄວາມ ຫຼື ສຽງອາດຈະບໍ່ແຈ້ງ]";
+                        break; 
+                    } catch (err) {
+                        attempts++;
+                        if (attempts >= maxAttempts) throw err;
+                        await new Promise(resolve => setTimeout(resolve, delays[attempts - 1]));
+                    }
+                }
+
+                responseText = responseText.replace(/\*\*(.*?)\*\*/g, '$1');
+
+                loading.classList.add('hidden');
+                textArea.value = responseText;
+                textArea.classList.remove('hidden', 'text-red-500');
+                updateTranscriptData(index, responseText);
+                
+                btn.innerHTML = '<i class="ph ph-arrows-clockwise"></i> ແກະສຽງພາກນີ້ໃໝ່';
+                btn.classList.remove('bg-slate-800', 'hover:bg-slate-900', 'hidden');
+                btn.classList.add('bg-slate-200', 'hover:bg-slate-300', 'text-slate-800', 'mt-2');
+
+            } catch (error) {
+                loading.classList.add('hidden');
+                btn.classList.remove('hidden');
+                btn.innerHTML = '<i class="ph ph-arrows-clockwise"></i> ລອງແກະສຽງໃໝ່ອີກຄັ້ງ';
+                
+                textArea.value = "ເກີດຂໍ້ຜິດພາດ: " + error.message + "\n\n(ຄຳແນະນຳ: ລອງກວດສອບອິນເຕີເນັດ ຫຼື ລອງກົດແກະສຽງໃໝ່ອີກຄັ້ງ)";
+                textArea.classList.remove('hidden');
+                textArea.classList.add('text-red-500');
+            }
+        }
+
+        // ຟັງຊັນລວມຂໍ້ຄວາມທັງໝົດ
+        function combineTranscripts() {
+            if(!window.audioChunksData || window.audioChunksData.length === 0) {
+                alert("ຍັງບໍ່ມີຂໍ້ມູນ!");
+                return;
+            }
+
+            let combinedText = "";
+            let hasContent = false;
+
+            window.audioChunksData.forEach((chunk, index) => {
+                const textArea = document.getElementById(`transcriptText_${index}`);
+                const currentText = textArea ? textArea.value : chunk.transcript;
+                
+                if(currentText && currentText.trim() !== "" && !currentText.startsWith("ເກີດຂໍ້ຜິດພາດ:")) {
+                    hasContent = true;
+                    // ຖ້າເປັນ Smart Split ເຮົາບໍ່ຈຳເປັນຕ້ອງໃສ່ຫົວຂໍ້ພາກກໍໄດ້ ເພາະມັນຈະຕໍ່ເນື່ອງກັນເລີຍ
+                    combinedText += `\n--- [ສິ້ນສຸດພາກທີ ${index} ເຂົ້າສູ່ພາກທີ ${index + 1}] ---\n`;
+                    combinedText += `${currentText}\n`;
+                }
+            });
+
+            if(!hasContent) {
+                alert("ຍັງບໍ່ມີຂໍ້ຄວາມຈາກການແກະສຽງ! ກະລຸນາກົດປຸ່ມ 'ແກະສຽງ (Transcript) ດ້ວຍ AI' ໃຫ້ສຳເລັດກ່ອນ.");
+                return;
+            }
+
+            const combinedTextarea = document.getElementById('combinedTextarea');
+            combinedTextarea.value = combinedText.trim();
+            document.getElementById('combinedContainer').classList.remove('hidden');
+            
+            combinedTextarea.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+
+        // ຟັງຊັນ Export ຂໍ້ຄວາມລວມເປັນ Word
+        function exportCombinedToWord() {
+            const combinedText = document.getElementById('combinedTextarea').value;
+            if(!combinedText.trim()) {
+                alert("ບໍ່ມີຂໍ້ຄວາມໃຫ້ Export! ກະລຸນາກົດປຸ່ມ 'ລວມຂໍ້ຄວາມ' ກ່ອນ.");
+                return;
+            }
+            
+            const topic = document.getElementById('topic').value || 'FGD_Transcript';
+            let htmlContent = `<h1 style="text-align: center;">ບັນທຶກການສົນທະນາ: ${topic}</h1><hr><br>`;
+            
+            const formattedText = combinedText.replace(/\n/g, '<br>');
+            htmlContent += `<p style="line-height: 1.6;">${formattedText}</p><br>`;
+
+            const header = "<html xmlns:o='urn:schemas-microsoft-com:office:office' xmlns:w='urn:schemas-microsoft-com:office:word' xmlns='http://www.w3.org/TR/REC-html40'><head><meta charset='utf-8'><title>Export Document</title><style>body { font-family: 'Saysettha OT', 'Noto Sans Lao', sans-serif; }</style></head><body>";
+            const footer = "</body></html>";
+            const sourceHTML = header + htmlContent + footer;
+            
+            const blob = new Blob(['\ufeff', sourceHTML], { type: 'application/msword' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${topic.replace(/\s+/g, '_')}.doc`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // --- ຟັງຊັນສຳລັບເຄື່ອງມືຕັດສຽງຕົວຢ່າງ (Voice Sample Extractor) ---
+        let mediaRecorder;
+        let recordedChunks = [];
+
+        function loadAudioPreview(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const player = document.getElementById('audioPlayer');
+            player.src = URL.createObjectURL(file);
+            document.getElementById('audioPreviewContainer').classList.remove('hidden');
+            
+            const extractBtn = document.getElementById('extractBtn');
+            extractBtn.disabled = false;
+            extractBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+            
+            player.onloadedmetadata = function() {
+                let endVal = player.duration > 10 ? 10 : Math.floor(player.duration);
+                document.getElementById('cutEnd').value = endVal;
+                document.getElementById('cutEndDisplay').innerText = endVal.toFixed(1);
+                document.getElementById('cutStart').value = 0;
+                document.getElementById('cutStartDisplay').innerText = "0.0";
+                updateDurationDisplay();
+            };
+        }
+
+        function setInitialTime(displayId, inputId) {
+            const player = document.getElementById('audioPlayer');
+            if(!player.src) return;
+            let time = Math.round(player.currentTime * 10) / 10;
+            document.getElementById(inputId).value = time;
+            document.getElementById(displayId).innerText = time.toFixed(1);
+            updateDurationDisplay();
+        }
+
+        function updateDurationDisplay() {
+            const start = parseFloat(document.getElementById('cutStart').value);
+            const end = parseFloat(document.getElementById('cutEnd').value);
+            let dur = end - start;
+            if(dur < 0) dur = 0;
+            document.getElementById('durationDisplay').innerText = dur.toFixed(1);
+        }
+
+        function extractSampleAndAdd() {
+            const player = document.getElementById('audioPlayer');
+            if(!player.src) return;
+
+            const start = parseFloat(document.getElementById('cutStart').value);
+            const end = parseFloat(document.getElementById('cutEnd').value);
+            const duration = end - start;
+            
+            if (duration <= 0) {
+                alert('ເວລາສິ້ນສຸດຕ້ອງຫຼາຍກວ່າເວລາເລີ່ມຕົ້ນ!'); 
+                return;
+            }
+
+            let stream;
+            if (player.captureStream) {
+                stream = player.captureStream();
+            } else if (player.mozCaptureStream) {
+                stream = player.mozCaptureStream();
+            } else {
+                alert("ບຣາວເຊີຂອງທ່ານບໍ່ຮອງຮັບຟັງຊັນການອັດສຽງຈາກວິດີໂອ. ກະລຸນາໃຊ້ Google Chrome ຫຼື Firefox.");
+                return;
+            }
+
+            const role = document.getElementById('sampleRole').value;
+            const name = document.getElementById('sampleName').value.trim() || 'Speaker';
+            const roleShort = role.includes('Moderator') ? 'Mod' : (role.includes('Prober') ? 'Prober' : 'Resp');
+            const fileName = `Sample_${roleShort}_${name.replace(/\s+/g, '_')}.webm`;
+
+            const btn = document.getElementById('extractBtn');
+            const status = document.getElementById('extractStatus');
+            btn.disabled = true;
+            btn.classList.add('opacity-50');
+            status.innerText = `ກຳລັງອັດສຽງຕົວຢ່າງແບບ Real-time (${duration} ວິນາທີ)... ກະລຸນາລໍຖ້າ!`;
+            status.classList.remove('hidden');
+
+            player.currentTime = start;
+            player.play();
+
+            recordedChunks = [];
+            mediaRecorder = new MediaRecorder(stream, { mimeType: 'audio/webm' }); 
+            mediaRecorder.ondataavailable = e => { if(e.data.size > 0) recordedChunks.push(e.data); };
+            
+            mediaRecorder.onstop = () => {
+                player.pause();
+                const blob = new Blob(recordedChunks, { type: 'audio/webm' });
+                const fileObj = new File([blob], fileName, { type: 'audio/webm' });
+                const url = URL.createObjectURL(blob);
+                
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = fileName;
+                a.click();
+
+                addSpeaker(role, name, fileName, fileObj);
+
+                btn.disabled = false;
+                btn.classList.remove('opacity-50');
+                status.innerText = "ສຳເລັດ! ໄຟລ໌ຕົວຢ່າງຖືກດາວໂຫຼດ ແລະ ເພີ່ມເຂົ້າໃນ Prompt ແລ້ວ.";
+                setTimeout(() => { status.classList.add('hidden'); }, 4000);
+            };
+
+            mediaRecorder.start();
+            
+            setTimeout(() => {
+                if(mediaRecorder.state === "recording") {
+                    mediaRecorder.stop();
+                }
+            }, duration * 1000);
+        }
+
+        window.onload = () => {
+            addSpeaker('ຜູ້ຖາມ (Moderator)', 'ຜູ້ຖາມຫຼັກ', 'Sample_Mod_ຜູ້ຖາມຫຼັກ.webm');
+            addSpeaker('ຜູ້ຕອບ (Respondent)', 'ທ້າວ ກ', '');
+            generatePrompt();
+        };
     </script>
 </body>
 </html>
