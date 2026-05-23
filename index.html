@@ -20,239 +20,281 @@
 </head>
 <body class="min-h-screen p-4 md:p-8 flex flex-col items-center gap-8">
 
-    <div class="max-w-3xl w-full bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col">
-        <!-- ພາກສ່ວນຟອມປ້ອນຂໍ້ມູນ -->
-        <div class="w-full p-6 md:p-8 bg-slate-50">
-            <div class="mb-6">
-                <div class="flex justify-between items-start">
-                    <h1 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                        <i class="ph-fill ph-users-three text-blue-600"></i>
-                        ສ້າງ Prompt ແກະສຽງ FGD
-                    </h1>
-                    <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full border border-blue-200 shadow-sm flex items-center gap-1">
-                        <i class="ph-fill ph-user-circle text-sm"></i> ຜູ້ສ້າງ: Sengdeuan
-                    </span>
+    <!-- ໜ້າ Login -->
+    <div id="loginScreen" class="fixed inset-0 bg-slate-900 flex flex-col items-center justify-center z-50 p-4">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-sm w-full">
+            <div class="text-center mb-6">
+                <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <i class="ph-fill ph-lock-key text-3xl text-blue-600"></i>
                 </div>
-                <p class="text-slate-500 text-sm mt-2">ປ້ອນຂໍ້ມູນກ່ຽວກັບການສົນທະນາຂອງທ່ານ ເພື່ອໃຫ້ AI ເຂົ້າໃຈບໍລິບົດ ແລະ ແກະສຽງໄດ້ຖືກຕ້ອງທີ່ສຸດ.</p>
+                <h2 class="text-2xl font-bold text-slate-800">ເຂົ້າສູ່ລະບົບ</h2>
+                <p class="text-sm text-slate-500 mt-2">ກະລຸນາປ້ອນລະຫັດຜ່ານເພື່ອເຂົ້າໃຊ້ງານ FGD Tools</p>
             </div>
-
-            <form id="promptForm" class="space-y-4">
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">ຫົວຂໍ້ການສົນທະນາ (Topic)</label>
-                    <input type="text" id="topic" placeholder="ຕົວຢ່າງ: ຄວາມຄິດເຫັນຕໍ່ສິນຄ້າໃໝ່, ບັນຫາການຮຽນອອນລາຍ..." 
-                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all">
-                </div>
-
-                <div class="grid grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1">ຈຳນວນຜູ້ເວົ້າ</label>
-                        <input type="number" id="speakers" placeholder="ເຊັ່ນ: 5" min="1" 
-                            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                    </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-slate-700 mb-1">ພາສາຂອງ Prompt</label>
-                        <select id="promptLang" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                            <option value="en">ພາສາອັງກິດ (ແນະນຳສຳລັບ AI)</option>
-                            <option value="lo">ພາສາລາວ</option>
-                        </select>
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">ຮູບແບບການແກະສຽງ (Style)</label>
-                    <select id="format" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
-                        <option value="clean">Clean Read (ຕັດຄຳຟຸມເຟືອຍ ເຊັ່ນ: ອືມ, ອ່າ ອອກ)</option>
-                        <option value="verbatim">Strict Verbatim (ເອົາທຸກຄຳເວົ້າ, ທຸກສຽງສະດຸດ)</option>
-                        <option value="summary">Summary (ສະຫຼຸບໃຈຄວາມສຳຄັນແຕ່ລະປະເດັນ)</option>
-                    </select>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">ການລະບຸຕົວຜູ້ເວົ້າ (Speaker ID)</label>
-                    <select id="speakerId" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" onchange="generatePrompt()">
-                        <option value="numbered">ໃຊ້ Speaker 1, Speaker 2, ຜູ້ປະສານງານ (Moderator)</option>
-                        <option value="names">ພະຍາຍາມລະບຸຊື່ຕາມທີ່ໄດ້ຍິນໃນສຽງ</option>
-                        <option value="none">ບໍ່ຈຳເປັນຕ້ອງແຍກຜູ້ເວົ້າ (ລວມກັນເລີຍ)</option>
-                    </select>
-                </div>
-
-                <!-- ລາຍລະອຽດຜູ້ເວົ້າ & ຕົວຢ່າງສຽງ -->
-                <div class="border border-slate-200 rounded-lg p-4 bg-slate-100">
-                    <div class="flex justify-between items-center mb-2">
-                        <label class="block text-sm font-semibold text-slate-800">ລາຍລະອຽດຜູ້ເວົ້າ & ຕົວຢ່າງສຽງ <span class="text-xs text-slate-500 font-normal">(ທາງເລືອກ)</span></label>
-                        <button type="button" onclick="addSpeaker()" class="text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded hover:bg-blue-300 transition-colors flex items-center gap-1 font-semibold">
-                            <i class="ph ph-plus"></i> ເພີ່ມຜູ້ເວົ້າ
-                        </button>
-                    </div>
-                    <p class="text-xs text-slate-600 mb-3 leading-relaxed">
-                        ລະບຸບົດບາດ, ຊື່, ID ຫຼື ອ້າງອີງເຖິງ <strong>ໄຟລ໌ສຽງຕົວຢ່າງ (Voice Sample)</strong> ເພື່ອໃຫ້ AI ແຍກສຽງໄດ້ຊັດເຈນທີ່ສຸດ.
-                    </p>
-                    <div id="speakersContainer" class="space-y-2"></div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">ຄຳສັ່ງເພີ່ມເຕີມ / ຄຳສັບສະເພາະ</label>
-                    <textarea id="extra" rows="3" placeholder="ຕົວຢ່າງ: ຄຳສັບສະເພາະທີ່ອາດໄດ້ຍິນ: CRM, Marketing, B2B..." 
-                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"></textarea>
-                </div>
-
-                <button type="button" onclick="copyToClipboard()" id="copyBtn"
-                    class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-4 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 mt-4 shadow-lg text-lg">
-                    <i class="ph ph-copy"></i> ກັອບປີ້ Prompt (Copy Prompt)
-                </button>
-            </form>
-            <textarea id="output" class="hidden"></textarea>
-            <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-full text-sm font-bold shadow-xl opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center gap-2">
-                <i class="ph-fill ph-check-circle text-lg"></i> ຄັດລອກ Prompt ສຳເລັດແລ້ວ!
-            </div>
-        </div>
-    </div>
-
-    <!-- ເຄື່ອງມືແບ່ງໄຟລ໌ສຽງ (Audio File Splitter) ສົມບູນແບບໃໝ່ -->
-    <div class="max-w-5xl w-full bg-white rounded-2xl shadow-xl overflow-hidden p-6 md:p-8">
-        <div class="mb-6 border-b border-slate-200 pb-4">
-            <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                <i class="ph-fill ph-scissors text-orange-500"></i>
-                ເຄື່ອງມືແບ່ງໄຟລ໌ສຽງຫຼັກ (Advanced Audio Splitter)
-            </h2>
-            <p class="text-slate-500 text-sm mt-2">ແບ່ງໄຟລ໌ສຽງໃຫ້ມີຂະໜາດພໍດີກັບການອ່ານຂອງ AI. ລະບົບໃໝ່ຮອງຮັບການແບ່ງຕາມເວລາ ເຊິ່ງເຮັດໃຫ້ໄຟລ໌ສົມບູນ 100%.</p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <div class="col-span-1 md:col-span-2 space-y-4">
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">1. ເລືອກໄຟລ໌ສຽງຂອງທ່ານ</label>
-                    <input type="file" id="audioFile" accept="audio/*,video/*" 
-                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100">
-                </div>
-                
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">2. ວິທີການແບ່ງ (Split Method)</label>
-                    <select id="splitMethod" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none">
-                        <option value="smart">ແບ່ງແບບສົມບູນ - ແບ່ງຕາມເວລາທຸກໆ 10 ນາທີ (Smart Split - ແນະນຳທີ່ສຸດ!)</option>
-                        <option value="binary" selected>ແບ່ງແບບໄວ - ແບ່ງຕາມຂະໜາດທຸກໆ 15MB (Binary Split - ໃຊ້ສະເພາະໄຟລ໌ໃຫຍ່ຫຼາຍ)</option>
-                    </select>
-                </div>
-
-                <div class="bg-green-50 text-green-800 p-3 rounded-lg text-xs md:text-sm flex gap-2 items-start border border-green-200">
-                    <i class="ph-fill ph-lightbulb text-lg text-green-600"></i>
-                    <div>
-                        <strong>Smart Split (ແນະນຳ):</strong> ລະບົບຈະແປງໄຟລ໌ເປັນ .wav ແລະ ຕັດທຸກໆ 10 ນາທີ ໂດຍມີການ <strong>Overlap (ເຫຼື້ອມເວລາ) 5 ວິນາທີ</strong> ເພື່ອບໍ່ໃຫ້ຄຳເວົ້າຂາດຫາຍ. (ອາດໃຊ້ເວລາປະມວນຜົນຈັກໜ່ອຍສຳລັບໄຟລ໌ຍາວ).
-                    </div>
-                </div>
-
-                <button type="button" onclick="splitFile()" id="mainSplitBtn"
-                    class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-md">
-                    <i class="ph ph-scissors"></i> ເລີ່ມປະມວນຜົນ ແລະ ແບ່ງໄຟລ໌
-                </button>
-            </div>
-
-            <div class="col-span-1 bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col h-full">
-                <h3 class="font-bold text-slate-700 mb-3 flex items-center gap-2">
-                    <i class="ph-fill ph-download-simple"></i> ໄຟລ໌ທີ່ແບ່ງແລ້ວ & ແກະສຽງ
-                </h3>
-                <div id="splitResults" class="space-y-4 flex-grow overflow-y-auto max-h-[500px] pr-2">
-                    <p class="text-sm text-slate-400 italic text-center mt-8">ເລືອກໄຟລ໌ ແລະ ກົດແບ່ງ ເພື່ອສະແດງຜົນຢູ່ບ່ອນນີ້</p>
-                </div>
-                
-                <div id="exportSection" class="hidden mt-4 pt-4 border-t border-slate-200 space-y-4">
-                    <button type="button" onclick="combineTranscripts()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 shadow">
-                        <i class="ph-fill ph-rows"></i> ລວມຂໍ້ຄວາມທີ່ແກະແລ້ວ
-                    </button>
-                    
-                    <div id="combinedContainer" class="hidden space-y-3">
-                        <div>
-                            <label class="block text-sm font-semibold text-slate-700 mb-1">ຂໍ້ຄວາມລວມທັງໝົດ</label>
-                            <textarea id="combinedTextarea" class="w-full h-64 p-4 text-sm border border-slate-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-blue-500 resize-y shadow-inner"></textarea>
-                        </div>
-                        <button type="button" onclick="exportCombinedToWord()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-lg">
-                            <i class="ph-fill ph-file-doc"></i> Export ຂໍ້ຄວາມເປັນ Word
-                        </button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- ເຄື່ອງມືຕັດສຽງຕົວຢ່າງ (Voice Sample Extractor) -->
-    <div class="max-w-5xl w-full bg-white rounded-2xl shadow-xl overflow-hidden p-6 md:p-8">
-        <div class="mb-6 border-b border-slate-200 pb-4">
-            <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
-                <i class="ph-fill ph-waveform text-purple-500"></i>
-                ເຄື່ອງມືຕັດສຽງຕົວຢ່າງຜູ້ເວົ້າ (Speaker Sample Extractor)
-            </h2>
-            <p class="text-slate-500 text-sm mt-2">ອັບໂຫຼດໄຟລ໌ສຽງເຕັມ, ຟັງເພື່ອຫາຊ່ວງເວລາທີ່ຜູ້ເວົ້າກຳລັງເວົ້າ, ແລ້ວລະບົບຈະອັດສຽງສະເພາະຊ່ວງນັ້ນແລ້ວຕັດອອກເປັນໄຟລ໌ຕົວຢ່າງພ້ອມເພີ່ມເຂົ້າໄປໃນ Prompt ໃຫ້ອັດຕະໂນມັດ.</p>
-        </div>
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
             <div class="space-y-4">
                 <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">1. ເລືອກໄຟລ໌ສຽງ/ວິດີໂອຫຼັກ</label>
-                    <input type="file" id="sampleAudioFile" accept="audio/*,video/*" onchange="loadAudioPreview(event)"
-                        class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
+                    <input type="password" id="loginPassword" class="w-full px-4 py-3 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none text-center text-lg tracking-widest" placeholder="ປ້ອນລະຫັດຜ່ານ..." onkeypress="if(event.key === 'Enter') handleLogin()">
+                </div>
+                <p id="loginError" class="text-red-500 text-sm hidden font-semibold text-center mt-1">ລະຫັດຜ່ານບໍ່ຖືກຕ້ອງ!</p>
+                <button type="button" onclick="handleLogin()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors shadow flex items-center justify-center gap-2">
+                    <i class="ph-bold ph-sign-in"></i> ເຂົ້າສູ່ລະບົບ
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ແອັບຫຼັກ (ເຊື່ອງໄວ້ກ່ອນເຂົ້າສູ່ລະບົບສຳເລັດ) -->
+    <div id="appContent" class="hidden w-full flex-col items-center gap-8">
+        
+        <div class="max-w-3xl w-full bg-white rounded-2xl shadow-xl overflow-hidden flex flex-col">
+            <!-- ພາກສ່ວນຟອມປ້ອນຂໍ້ມູນ -->
+            <div class="w-full p-6 md:p-8 bg-slate-50">
+                <div class="mb-6">
+                    <div class="flex justify-between items-start">
+                        <h1 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                            <i class="ph-fill ph-users-three text-blue-600"></i>
+                            ສ້າງ Prompt ແກະສຽງ FGD
+                        </h1>
+                        <span class="bg-blue-100 text-blue-800 text-xs font-semibold px-3 py-1 rounded-full border border-blue-200 shadow-sm flex items-center gap-1">
+                            <i class="ph-fill ph-user-circle text-sm"></i> ຜູ້ສ້າງ: Sengdeuan
+                        </span>
+                    </div>
+                    <p class="text-slate-500 text-sm mt-2">ປ້ອນຂໍ້ມູນກ່ຽວກັບການສົນທະນາຂອງທ່ານ ເພື່ອໃຫ້ AI ເຂົ້າໃຈບໍລິບົດ ແລະ ແກະສຽງໄດ້ຖືກຕ້ອງທີ່ສຸດ.</p>
                 </div>
 
-                <div id="audioPreviewContainer" class="hidden space-y-4">
-                    <audio id="audioPlayer" controls class="w-full rounded-lg bg-slate-100"></audio>
-                    <div class="flex flex-col gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl">
-                        <p class="text-xs text-slate-500 font-semibold text-center mb-1">ຫຼິ້ນສຽງແລ້ວກົດປຸ່ມເພື່ອກຳນົດຊ່ວງເວລາທີ່ຕ້ອງການຕັດ</p>
-                        <div class="flex items-center justify-between gap-4">
-                            <div class="flex-1 text-center">
-                                <button type="button" onclick="setInitialTime('cutStartDisplay', 'cutStart')" class="w-full mb-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm">
-                                    <i class="ph-fill ph-map-pin"></i> ເລີ່ມຕົ້ນທີ່ນີ້
-                                </button>
-                                <div class="text-sm font-mono bg-white border border-slate-300 rounded py-1 px-2 text-slate-700 shadow-inner">
-                                    <span id="cutStartDisplay">0.0</span> ວິ
-                                </div>
-                                <input type="hidden" id="cutStart" value="0">
-                            </div>
-                            <div class="flex-1 text-center">
-                                <button type="button" onclick="setInitialTime('cutEndDisplay', 'cutEnd')" class="w-full mb-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm">
-                                    <i class="ph-fill ph-flag-checkered"></i> ສິ້ນສຸດທີ່ນີ້
-                                </button>
-                                <div class="text-sm font-mono bg-white border border-slate-300 rounded py-1 px-2 text-slate-700 shadow-inner">
-                                    <span id="cutEndDisplay">10.0</span> ວິ
-                                </div>
-                                <input type="hidden" id="cutEnd" value="10">
-                            </div>
+                <form id="promptForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">ຫົວຂໍ້ການສົນທະນາ (Topic)</label>
+                        <input type="text" id="topic" placeholder="ຕົວຢ່າງ: ຄວາມຄິດເຫັນຕໍ່ສິນຄ້າໃໝ່, ບັນຫາການຮຽນອອນລາຍ..." 
+                            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                    </div>
+
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">ຈຳນວນຜູ້ເວົ້າ</label>
+                            <input type="number" id="speakers" placeholder="ເຊັ່ນ: 5" min="1" 
+                                class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
                         </div>
-                        <div class="text-center text-xs text-slate-600 mt-2 bg-indigo-50 py-1 rounded border border-indigo-100">
-                            ຄວາມຍາວສຽງຕົວຢ່າງ: <span id="durationDisplay" class="font-bold text-indigo-700 text-sm">10.0</span> ວິນາທີ
+                        <div>
+                            <label class="block text-sm font-semibold text-slate-700 mb-1">ພາສາຂອງ Prompt</label>
+                            <select id="promptLang" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                                <option value="en">ພາສາອັງກິດ (ແນະນຳສຳລັບ AI)</option>
+                                <option value="lo">ພາສາລາວ</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">ຮູບແບບການແກະສຽງ (Style)</label>
+                        <select id="format" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none">
+                            <option value="clean">Clean Read (ຕັດຄຳຟຸມເຟືອຍ ເຊັ່ນ: ອືມ, ອ່າ ອອກ)</option>
+                            <option value="verbatim">Strict Verbatim (ເອົາທຸກຄຳເວົ້າ, ທຸກສຽງສະດຸດ)</option>
+                            <option value="summary">Summary (ສະຫຼຸບໃຈຄວາມສຳຄັນແຕ່ລະປະເດັນ)</option>
+                        </select>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">ການລະບຸຕົວຜູ້ເວົ້າ (Speaker ID)</label>
+                        <select id="speakerId" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none" onchange="generatePrompt()">
+                            <option value="numbered">ໃຊ້ Speaker 1, Speaker 2, ຜູ້ປະສານງານ (Moderator)</option>
+                            <option value="names">ພະຍາຍາມລະບຸຊື່ຕາມທີ່ໄດ້ຍິນໃນສຽງ</option>
+                            <option value="none">ບໍ່ຈຳເປັນຕ້ອງແຍກຜູ້ເວົ້າ (ລວມກັນເລີຍ)</option>
+                        </select>
+                    </div>
+
+                    <!-- ລາຍລະອຽດຜູ້ເວົ້າ & ຕົວຢ່າງສຽງ -->
+                    <div class="border border-slate-200 rounded-lg p-4 bg-slate-100">
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-sm font-semibold text-slate-800">ລາຍລະອຽດຜູ້ເວົ້າ & ຕົວຢ່າງສຽງ <span class="text-xs text-slate-500 font-normal">(ທາງເລືອກ)</span></label>
+                            <button type="button" onclick="addSpeaker()" class="text-xs bg-blue-200 text-blue-800 px-2 py-1 rounded hover:bg-blue-300 transition-colors flex items-center gap-1 font-semibold">
+                                <i class="ph ph-plus"></i> ເພີ່ມຜູ້ເວົ້າ
+                            </button>
+                        </div>
+                        <p class="text-xs text-slate-600 mb-3 leading-relaxed">
+                            ລະບຸບົດບາດ, ຊື່, ID ຫຼື ອ້າງອີງເຖິງ <strong>ໄຟລ໌ສຽງຕົວຢ່າງ (Voice Sample)</strong> ເພື່ອໃຫ້ AI ແຍກສຽງໄດ້ຊັດເຈນທີ່ສຸດ.
+                        </p>
+                        <div id="speakersContainer" class="space-y-2"></div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">ຄຳສັ່ງເພີ່ມເຕີມ / ຄຳສັບສະເພາະ</label>
+                        <textarea id="extra" rows="3" placeholder="ຕົວຢ່າງ: ຄຳສັບສະເພາະທີ່ອາດໄດ້ຍິນ: CRM, Marketing, B2B..." 
+                            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none resize-none"></textarea>
+                    </div>
+
+                    <button type="button" onclick="copyToClipboard()" id="copyBtn"
+                        class="w-full bg-slate-800 hover:bg-slate-900 text-white font-bold py-4 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 mt-4 shadow-lg text-lg">
+                        <i class="ph ph-copy"></i> ກັອບປີ້ Prompt (Copy Prompt)
+                    </button>
+                </form>
+                <textarea id="output" class="hidden"></textarea>
+                <div id="toast" class="fixed bottom-10 left-1/2 transform -translate-x-1/2 bg-green-500 text-white px-6 py-3 rounded-full text-sm font-bold shadow-xl opacity-0 transition-opacity duration-300 pointer-events-none z-50 flex items-center gap-2">
+                    <i class="ph-fill ph-check-circle text-lg"></i> ຄັດລອກ Prompt ສຳເລັດແລ້ວ!
+                </div>
+            </div>
+        </div>
+
+        <!-- ເຄື່ອງມືແບ່ງໄຟລ໌ສຽງ (Audio File Splitter) ສົມບູນແບບໃໝ່ -->
+        <div class="max-w-5xl w-full bg-white rounded-2xl shadow-xl overflow-hidden p-6 md:p-8">
+            <div class="mb-6 border-b border-slate-200 pb-4">
+                <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                    <i class="ph-fill ph-scissors text-orange-500"></i>
+                    ເຄື່ອງມືແບ່ງໄຟລ໌ສຽງຫຼັກ (Advanced Audio Splitter)
+                </h2>
+                <p class="text-slate-500 text-sm mt-2">ແບ່ງໄຟລ໌ສຽງໃຫ້ມີຂະໜາດພໍດີກັບການອ່ານຂອງ AI. ລະບົບໃໝ່ຮອງຮັບການແບ່ງຕາມເວລາ ເຊິ່ງເຮັດໃຫ້ໄຟລ໌ສົມບູນ 100%.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <div class="col-span-1 md:col-span-2 space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">1. ເລືອກໄຟລ໌ສຽງຂອງທ່ານ</label>
+                        <input type="file" id="audioFile" accept="audio/*,video/*" 
+                            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">2. ວິທີການແບ່ງ (Split Method)</label>
+                        <select id="splitMethod" class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-orange-500 outline-none">
+                            <option value="smart">ແບ່ງແບບສົມບູນ - ແບ່ງຕາມເວລາທຸກໆ 10 ນາທີ (Smart Split - ແນະນຳທີ່ສຸດ!)</option>
+                            <option value="binary" selected>ແບ່ງແບບໄວ - ແບ່ງຕາມຂະໜາດທຸກໆ 15MB (Binary Split - ໃຊ້ສະເພາະໄຟລ໌ໃຫຍ່ຫຼາຍ)</option>
+                        </select>
+                    </div>
+
+                    <div class="bg-green-50 text-green-800 p-3 rounded-lg text-xs md:text-sm flex gap-2 items-start border border-green-200">
+                        <i class="ph-fill ph-lightbulb text-lg text-green-600"></i>
+                        <div>
+                            <strong>Smart Split (ແນະນຳ):</strong> ລະບົບຈະແປງໄຟລ໌ເປັນ .wav ແລະ ຕັດທຸກໆ 10 ນາທີ ໂດຍມີການ <strong>Overlap (ເຫຼື້ອມເວລາ) 5 ວິນາທີ</strong> ເພື່ອບໍ່ໃຫ້ຄຳເວົ້າຂາດຫາຍ. (ອາດໃຊ້ເວລາປະມວນຜົນຈັກໜ່ອຍສຳລັບໄຟລ໌ຍາວ).
+                        </div>
+                    </div>
+
+                    <button type="button" onclick="splitFile()" id="mainSplitBtn"
+                        class="w-full bg-orange-500 hover:bg-orange-600 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-md">
+                        <i class="ph ph-scissors"></i> ເລີ່ມປະມວນຜົນ ແລະ ແບ່ງໄຟລ໌
+                    </button>
+                </div>
+
+                <div class="col-span-1 bg-slate-50 p-4 rounded-xl border border-slate-200 flex flex-col h-full">
+                    <h3 class="font-bold text-slate-700 mb-3 flex items-center gap-2">
+                        <i class="ph-fill ph-download-simple"></i> ໄຟລ໌ທີ່ແບ່ງແລ້ວ & ແກະສຽງ
+                    </h3>
+                    <div id="splitResults" class="space-y-4 flex-grow overflow-y-auto max-h-[500px] pr-2">
+                        <p class="text-sm text-slate-400 italic text-center mt-8">ເລືອກໄຟລ໌ ແລະ ກົດແບ່ງ ເພື່ອສະແດງຜົນຢູ່ບ່ອນນີ້</p>
+                    </div>
+                    
+                    <div id="exportSection" class="hidden mt-4 pt-4 border-t border-slate-200 space-y-4">
+                        <button type="button" onclick="combineTranscripts()" class="w-full bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 shadow">
+                            <i class="ph-fill ph-rows"></i> ລວມຂໍ້ຄວາມທີ່ແກະແລ້ວ
+                        </button>
+                        
+                        <div id="combinedContainer" class="hidden space-y-3">
+                            <div>
+                                <label class="block text-sm font-semibold text-slate-700 mb-1">ຂໍ້ຄວາມລວມທັງໝົດ</label>
+                                <textarea id="combinedTextarea" class="w-full h-64 p-4 text-sm border border-slate-300 rounded-lg bg-white outline-none focus:ring-2 focus:ring-blue-500 resize-y shadow-inner"></textarea>
+                            </div>
+                            <button type="button" onclick="exportCombinedToWord()" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-lg">
+                                <i class="ph-fill ph-file-doc"></i> Export ຂໍ້ຄວາມເປັນ Word
+                            </button>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
 
-            <div class="space-y-4 bg-purple-50 p-4 rounded-xl border border-purple-100">
-                <h3 class="font-bold text-slate-700 mb-2">2. ລະບຸປະເພດ ແລະ ຊື່ຜູ້ເວົ້າ</h3>
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">ປະເພດ (Role)</label>
-                    <select id="sampleRole" class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-purple-500">
-                        <option value="ຜູ້ຖາມ (Moderator)">ຜູ້ຖາມ (Moderator)</option>
-                        <option value="ຜູ້ເຈາະຈີ້ມ (Prober)">ຜູ້ເຈາະຈີ້ມ (Prober/Interviewer)</option>
-                        <option value="ຜູ້ຕອບ (Respondent)" selected>ຜູ້ຕອບ (Respondent)</option>
-                    </select>
-                </div>
-                <div>
-                    <label class="block text-sm font-semibold text-slate-700 mb-1">ຊື່ ຫຼື ນາມແຝງ</label>
-                    <input type="text" id="sampleName" placeholder="ເຊັ່ນ: ທ້າວ ສົມດີ, ປ້າ ແກ້ວ..." class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-purple-500">
+        <!-- ເຄື່ອງມືຕັດສຽງຕົວຢ່າງ (Voice Sample Extractor) -->
+        <div class="max-w-5xl w-full bg-white rounded-2xl shadow-xl overflow-hidden p-6 md:p-8">
+            <div class="mb-6 border-b border-slate-200 pb-4">
+                <h2 class="text-2xl font-bold text-slate-800 flex items-center gap-2">
+                    <i class="ph-fill ph-waveform text-purple-500"></i>
+                    ເຄື່ອງມືຕັດສຽງຕົວຢ່າງຜູ້ເວົ້າ (Speaker Sample Extractor)
+                </h2>
+                <p class="text-slate-500 text-sm mt-2">ອັບໂຫຼດໄຟລ໌ສຽງເຕັມ, ຟັງເພື່ອຫາຊ່ວງເວລາທີ່ຜູ້ເວົ້າກຳລັງເວົ້າ, ແລ້ວລະບົບຈະອັດສຽງສະເພາະຊ່ວງນັ້ນແລ້ວຕັດອອກເປັນໄຟລ໌ຕົວຢ່າງພ້ອມເພີ່ມເຂົ້າໄປໃນ Prompt ໃຫ້ອັດຕະໂນມັດ.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">1. ເລືອກໄຟລ໌ສຽງ/ວິດີໂອຫຼັກ</label>
+                        <input type="file" id="sampleAudioFile" accept="audio/*,video/*" onchange="loadAudioPreview(event)"
+                            class="w-full px-4 py-2 border border-slate-300 rounded-lg focus:ring-2 focus:ring-purple-500 outline-none file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-purple-50 file:text-purple-700 hover:file:bg-purple-100">
+                    </div>
+
+                    <div id="audioPreviewContainer" class="hidden space-y-4">
+                        <audio id="audioPlayer" controls class="w-full rounded-lg bg-slate-100"></audio>
+                        <div class="flex flex-col gap-3 p-4 bg-slate-50 border border-slate-200 rounded-xl">
+                            <p class="text-xs text-slate-500 font-semibold text-center mb-1">ຫຼິ້ນສຽງແລ້ວກົດປຸ່ມເພື່ອກຳນົດຊ່ວງເວລາທີ່ຕ້ອງການຕັດ</p>
+                            <div class="flex items-center justify-between gap-4">
+                                <div class="flex-1 text-center">
+                                    <button type="button" onclick="setInitialTime('cutStartDisplay', 'cutStart')" class="w-full mb-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm">
+                                        <i class="ph-fill ph-map-pin"></i> ເລີ່ມຕົ້ນທີ່ນີ້
+                                    </button>
+                                    <div class="text-sm font-mono bg-white border border-slate-300 rounded py-1 px-2 text-slate-700 shadow-inner">
+                                        <span id="cutStartDisplay">0.0</span> ວິ
+                                    </div>
+                                    <input type="hidden" id="cutStart" value="0">
+                                </div>
+                                <div class="flex-1 text-center">
+                                    <button type="button" onclick="setInitialTime('cutEndDisplay', 'cutEnd')" class="w-full mb-2 bg-indigo-100 hover:bg-indigo-200 text-indigo-700 font-bold py-2 px-3 rounded-lg transition-colors flex items-center justify-center gap-2 shadow-sm">
+                                        <i class="ph-fill ph-flag-checkered"></i> ສິ້ນສຸດທີ່ນີ້
+                                    </button>
+                                    <div class="text-sm font-mono bg-white border border-slate-300 rounded py-1 px-2 text-slate-700 shadow-inner">
+                                        <span id="cutEndDisplay">10.0</span> ວິ
+                                    </div>
+                                    <input type="hidden" id="cutEnd" value="10">
+                                </div>
+                            </div>
+                            <div class="text-center text-xs text-slate-600 mt-2 bg-indigo-50 py-1 rounded border border-indigo-100">
+                                ຄວາມຍາວສຽງຕົວຢ່າງ: <span id="durationDisplay" class="font-bold text-indigo-700 text-sm">10.0</span> ວິນາທີ
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <div class="bg-white p-3 rounded text-xs text-slate-600 border border-purple-200 mt-2">
-                    <i class="ph-fill ph-info text-purple-500"></i> ລະບົບຈະຫຼິ້ນສຽງຕາມຊ່ວງເວລາທີ່ກຳນົດ ແລະ ອັດສຽງດັ່ງກ່າວເປັນໄຟລ໌ໃໝ່ (Real-time).
-                </div>
+                <div class="space-y-4 bg-purple-50 p-4 rounded-xl border border-purple-100">
+                    <h3 class="font-bold text-slate-700 mb-2">2. ລະບຸປະເພດ ແລະ ຊື່ຜູ້ເວົ້າ</h3>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">ປະເພດ (Role)</label>
+                        <select id="sampleRole" class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-purple-500">
+                            <option value="ຜູ້ຖາມ (Moderator)">ຜູ້ຖາມ (Moderator)</option>
+                            <option value="ຜູ້ເຈາະຈີ້ມ (Prober)">ຜູ້ເຈາະຈີ້ມ (Prober/Interviewer)</option>
+                            <option value="ຜູ້ຕອບ (Respondent)" selected>ຜູ້ຕອບ (Respondent)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">ຊື່ ຫຼື ນາມແຝງ</label>
+                        <input type="text" id="sampleName" placeholder="ເຊັ່ນ: ທ້າວ ສົມດີ, ປ້າ ແກ້ວ..." class="w-full px-4 py-2 border border-slate-300 rounded-lg outline-none focus:ring-2 focus:ring-purple-500">
+                    </div>
 
-                <button type="button" onclick="extractSampleAndAdd()" id="extractBtn"
-                    class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 mt-4 opacity-50 cursor-not-allowed" disabled>
-                    <i class="ph ph-scissors"></i> ຕັດສຽງ, ດາວໂຫຼດ ແລະ ເພີ່ມເຂົ້າ Prompt
-                </button>
-                <div id="extractStatus" class="text-sm font-semibold text-center text-purple-700 hidden mt-2"></div>
+                    <div class="bg-white p-3 rounded text-xs text-slate-600 border border-purple-200 mt-2">
+                        <i class="ph-fill ph-info text-purple-500"></i> ລະບົບຈະຫຼິ້ນສຽງຕາມຊ່ວງເວລາທີ່ກຳນົດ ແລະ ອັດສຽງດັ່ງກ່າວເປັນໄຟລ໌ໃໝ່ (Real-time).
+                    </div>
+
+                    <button type="button" onclick="extractSampleAndAdd()" id="extractBtn"
+                        class="w-full bg-purple-600 hover:bg-purple-700 text-white font-bold py-3 px-4 rounded-lg transition-colors flex items-center justify-center gap-2 mt-4 opacity-50 cursor-not-allowed" disabled>
+                        <i class="ph ph-scissors"></i> ຕັດສຽງ, ດາວໂຫຼດ ແລະ ເພີ່ມເຂົ້າ Prompt
+                    </button>
+                    <div id="extractStatus" class="text-sm font-semibold text-center text-purple-700 hidden mt-2"></div>
+                </div>
             </div>
         </div>
-    </div>
+    </div> <!-- ສິ້ນສຸດ appContent -->
 
     <!-- Scripts -->
     <script>
+        // --- ລະບົບ Login ---
+        function handleLogin() {
+            const pwdInput = document.getElementById('loginPassword').value;
+            const errorMsg = document.getElementById('loginError');
+            
+            if (pwdInput === 'admin') {
+                document.getElementById('loginScreen').classList.add('hidden');
+                const appContent = document.getElementById('appContent');
+                appContent.classList.remove('hidden');
+                appContent.classList.add('flex'); // ສະແດງແອັບຫຼັກໃນຮູບແບບ Flex
+            } else {
+                errorMsg.classList.remove('hidden');
+            }
+        }
+
         window.audioChunksData = [];
 
         function addSpeaker(roleValue = 'ຜູ້ຕອບ (Respondent)', nameValue = '', fileValue = '', fileObj = null) {
